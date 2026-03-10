@@ -792,8 +792,8 @@ async function fetchIndepLambda(homeCN,awayCN,leagueCN){
   try{
     // 搜索主客队ID
     const [resH,resA]=await Promise.all([
-      fetch(`${AF_BASE}/teams?search=${encodeURIComponent(homeEN)}`,{headers:{'x-apisports-key':AF_KEY}}),
-      fetch(`${AF_BASE}/teams?search=${encodeURIComponent(awayEN)}`,{headers:{'x-apisports-key':AF_KEY}})
+      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(homeEN)}&_key=${AF_KEY}`),
+      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(awayEN)}&_key=${AF_KEY}`)
     ]);
     const [dH,dA]=await Promise.all([resH.json(),resA.json()]);
     const tidH=dH?.response?.[0]?.team?.id;
@@ -802,8 +802,8 @@ async function fetchIndepLambda(homeCN,awayCN,leagueCN){
     const season=new Date().getFullYear();// 当前赛季
     // 获取主队近10场主场比赛、客队近10场客场比赛
     const [fixH,fixA]=await Promise.all([
-      fetch(`${AF_BASE}/fixtures?team=${tidH}&league=${leagueId}&season=${season}&last=10`,{headers:{'x-apisports-key':AF_KEY}}),
-      fetch(`${AF_BASE}/fixtures?team=${tidA}&league=${leagueId}&season=${season}&last=10`,{headers:{'x-apisports-key':AF_KEY}})
+      fetch(`${PROXY}/af/fixtures?team=${tidH}&league=${leagueId}&season=${season}&last=10&_key=${AF_KEY}`),
+      fetch(`${PROXY}/af/fixtures?team=${tidA}&league=${leagueId}&season=${season}&last=10&_key=${AF_KEY}`)
     ]);
     const [fH,fA]=await Promise.all([fixH.json(),fixA.json()]);
     const gamesH=fH?.response||[];
@@ -1812,7 +1812,7 @@ function runMonteCarloWithData(selected){
           const roi=+((simProb/100*combinedOdds-1)*100).toFixed(1);
           return{combinedOdds,theorProb,simProb,ev,roi,a,b,
             row:`<tr>
-              <td class="tl" style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label}[${sa.dir}] × ${sb.label}[${sb.dir}]</td>
+              <td class="tl" style="font-size:10px;line-height:1.6">${sa.label}【${sa.dir}】<br>× ${sb.label}【${sb.dir}】</td>
               <td style="font-family:var(--mono);color:var(--or);font-weight:700">${combinedOdds}x</td>
               <td style="font-family:var(--mono)">${theorProb}%</td>
               <td style="font-family:var(--mono);color:var(--green)">${simProb}%</td>
@@ -1830,7 +1830,7 @@ function runMonteCarloWithData(selected){
           const roi=+((simProb/100*combinedOdds-1)*100).toFixed(1);
           return{combinedOdds,theorProb,simProb,ev,roi,a,b,c:c2,
             row:`<tr>
-              <td class="tl" style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label}[${sa.dir}] × ${sb.label}[${sb.dir}] × ${sc.label}[${sc.dir}]</td>
+              <td class="tl" style="font-size:10px;line-height:1.6">${sa.label}【${sa.dir}】<br>× ${sb.label}【${sb.dir}】<br>× ${sc.label}【${sc.dir}】</td>
               <td style="font-family:var(--mono);color:var(--purple);font-weight:700">${combinedOdds}x</td>
               <td style="font-family:var(--mono)">${theorProb}%</td>
               <td style="font-family:var(--mono);color:var(--green)">${simProb}%</td>
