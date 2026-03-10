@@ -1689,33 +1689,31 @@ function autoSelectAndRun(){
     document.getElementById('mc-result').innerHTML='<div style="color:var(--red);font-size:12px;padding:8px">⚠ 请先在精算引擎Tab拉取数据</div>';
     return;
   }
-  // 每场自动选EV最优方向（EV=prob*odds-1）
-  // 若全负EV则选概率最高方向
   mcPool.forEach((m,i)=>{
-    // 取消不选此场
-    const skipEl=document.getElementById('mc-skip-'+i);
-    if(skipEl)skipEl.checked=false;
-    mcToggleSkip(i);// 恢复显示
+    // 确保不跳过任何场次
+    document.querySelectorAll('[id="mc-skip-'+i+'"]').forEach(el=>el.checked=false);
 
+    // 找EV最优方向
     let bestJ=0,bestEV=-99;
     m.options.forEach((o,j)=>{
       const ev=o.prob*o.odds-1;
       if(ev>bestEV){bestEV=ev;bestJ=j;}
     });
-    // 若最优EV也是负的，改选概率最高方向
+    // 全负EV则选概率最高方向
     if(bestEV<-0.15){
       let bestProb=0;
       m.options.forEach((o,j)=>{if(o.prob>bestProb){bestProb=o.prob;bestJ=j;}});
     }
-    // 选中该radio
-    const radios=document.querySelectorAll('input[name="mc-pick-'+i+'"]');
-    radios.forEach((r,j)=>{
-      r.checked=(j===bestJ);
-      if(j===bestJ)mcHighlight(i,j);
-    });
+    // 直接设置radio checked（不依赖DOM查找，直接操作mcPool对应的input）
+    const container=document.getElementById('mc-picks');
+    if(container){
+      const radios=container.querySelectorAll('input[name="mc-pick-'+i+'"]');
+      radios.forEach((r,j)=>{r.checked=(j===bestJ);});
+      mcHighlight(i,bestJ);
+    }
   });
-  // 自动运行模拟
-  runMonteCarlo();
+  // 稍微延迟确保DOM更新后再模拟
+  setTimeout(runMonteCarlo,50);
 }
 
 function runMonteCarlo(){
