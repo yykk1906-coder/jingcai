@@ -1,191 +1,954 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>竞彩比分精算</title>
+<title>竞彩精算引擎 PRO v9 · 比分精算整合版</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#04080f;--card:#091018;--bg3:#0b1627;--border:#152030;--border2:#1d3050;--or:#ff6a00;--gold:#ffc837;--green:#00e5a0;--red:#ff3d5a;--blue:#38b6ff;--purple:#a78bfa;--cyan:#22d3ee;--text:#d8eaf8;--sub:#4d6a8a;--sub2:#7a9ab8}
+:root{
+  --bg:#04080f; --bg2:#07101c; --bg3:#0b1627; --card:#091018;
+  --border:#152030; --border2:#1d3050;
+  --or:#ff6a00; --gold:#ffc837; --green:#00e5a0; --red:#ff3d5a;
+  --blue:#38b6ff; --purple:#a78bfa; --cyan:#22d3ee;
+  --text:#d8eaf8; --sub:#4d6a8a; --sub2:#7a9ab8;
+  --mono:'Share Tech Mono',monospace;
+  --sans:'Noto Sans SC',sans-serif;
+  --num:'Rajdhani',sans-serif;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:sans-serif;font-size:13px}
-.nav{position:sticky;top:0;z-index:200;background:rgba(4,8,15,.96);border-bottom:1px solid var(--border2);height:52px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:16px;font-weight:700;color:var(--or);letter-spacing:2px;display:flex;align-items:center;gap:8px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;flex-shrink:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.5;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,180,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,255,.02) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+.topnav{position:sticky;top:0;z-index:200;background:rgba(4,8,15,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border2);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--num);font-size:17px;font-weight:700;color:var(--or);letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.status{font-size:10px;color:var(--sub);display:flex;align-items:center;gap:6px}
-.sdot{width:8px;height:8px;border-radius:50%;background:var(--sub);transition:all .3s}
-.hero{background:linear-gradient(135deg,#08142a,#0d0520 55%,#08142a);border-bottom:1px solid var(--border2);padding:20px 16px;text-align:center}
-.hero h1{font-size:clamp(20px,5vw,34px);font-weight:700;letter-spacing:3px;background:linear-gradient(135deg,var(--purple),var(--cyan) 60%,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{font-size:10px;color:var(--sub2);margin-top:4px;font-family:monospace}
-.main{max-width:980px;margin:0 auto;padding:14px 12px 60px}
-.note{font-size:11px;color:var(--sub2);padding:8px 12px;background:rgba(167,139,250,.04);border:1px solid rgba(167,139,250,.12);border-radius:6px;line-height:1.8;margin-bottom:10px}
-.ctrl{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn{padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.8px;transition:all .2s;white-space:nowrap}
-.btn-main{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff}
-.btn-main:disabled{opacity:.4;cursor:not-allowed}
-.btn-sec{background:var(--bg3);color:var(--sub2);border:1px solid var(--border2)}
-.alert{border-radius:8px;padding:10px 14px;font-size:11px;line-height:1.8;margin-bottom:10px;display:none;background:rgba(255,106,0,.05);border:1px solid rgba(255,106,0,.2)}
-.alert.show{display:block}
-.mlist{display:none;flex-direction:column;gap:6px;margin-bottom:12px}
-.mlist.show{display:flex}
-.mitem{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap;transition:all .2s}
-.mitem:hover,.mitem.sel{border-color:rgba(0,229,160,.4);background:rgba(0,229,160,.04)}
-.tag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:monospace;background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.2);white-space:nowrap}
-.mname{font-size:14px;font-weight:500;flex:1}
-.mtime{font-size:10px;color:var(--sub);font-family:monospace;white-space:nowrap}
-.mcnt{font-size:9px;font-family:monospace;white-space:nowrap}
-.result{display:none}
-.result.show{display:block}
-.mh{background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(56,182,255,.05));border:1px solid rgba(167,139,250,.18);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.mh-name{font-size:20px;font-weight:700}
-.mh-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
-.lstrip{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-.lbox{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;text-align:center;flex:1;min-width:70px}
-.ll{font-size:9px;color:var(--sub);margin-bottom:2px;font-family:monospace}
-.lv{font-size:19px;font-weight:700;line-height:1}
-.top-card{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:13px 14px;margin-bottom:10px}
-.top-title{font-size:10px;color:var(--or);letter-spacing:1.5px;margin-bottom:10px;font-family:monospace}
-.trow{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:4px}
-.tr-rk{font-size:18px;font-weight:700;min-width:18px}
-.tr-sc{font-size:18px;font-weight:700;min-width:40px}
-.tr-info{flex:1;font-size:11px;color:var(--sub2)}
-.tr-ev{font-size:12px;font-weight:700;font-family:monospace}
-.gtitle{font-size:10px;color:var(--sub2);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);font-family:monospace}
-.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:5px;margin-bottom:12px}
-.bcell{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px 8px}
-.bcell.best{border-color:rgba(0,229,160,.4);background:rgba(0,229,160,.05)}
-.bcell.good{border-color:rgba(255,200,55,.3);background:rgba(255,200,55,.03)}
-.bsc{font-size:15px;font-weight:700;line-height:1;margin-bottom:3px}
-.bsc.w{color:var(--green)}.bsc.d{color:var(--gold)}.bsc.l{color:var(--red)}
-.bp{font-size:9px;color:var(--sub);font-family:monospace}
-.bod{font-size:13px;font-weight:700;color:var(--cyan)}
-.bev{font-size:10px;font-weight:700;font-family:monospace}
+.nav-chips{display:flex;gap:6px}
+.nchip{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;font-family:var(--mono)}
+.nc-g{background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.25)}
+.nc-p{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.nc-o{background:rgba(255,106,0,.1);color:var(--or);border:1px solid rgba(255,106,0,.25)}
+.nav-date{font-size:11px;color:var(--sub);font-family:var(--mono)}
+.hero{position:relative;z-index:1;background:linear-gradient(135deg,#08142a,#180805 55%,#08142a);border-bottom:1px solid var(--border2);padding:28px 20px 22px;text-align:center;overflow:hidden}
+.hero::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:200px;background:radial-gradient(ellipse,rgba(255,106,0,.06),transparent 70%);pointer-events:none}
+.hero-title{font-family:var(--num);font-size:clamp(26px,5vw,48px);font-weight:700;letter-spacing:4px;background:linear-gradient(135deg,var(--or),var(--gold) 50%,var(--or));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.hero-sub{font-family:var(--mono);font-size:11px;color:var(--sub2);letter-spacing:1.5px;margin-bottom:18px}
+.model-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:20px}
+.mchip{font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid;font-family:var(--mono);font-weight:700}
+.mc1{background:rgba(255,106,0,.1);border-color:rgba(255,106,0,.3);color:var(--or)}
+.mc2{background:rgba(0,229,160,.08);border-color:rgba(0,229,160,.25);color:var(--green)}
+.mc3{background:rgba(56,182,255,.08);border-color:rgba(56,182,255,.25);color:var(--blue)}
+.mc4{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:var(--purple)}
+.mc5{background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.25);color:var(--cyan)}
+.stats-strip{display:flex;justify-content:center;gap:2px;flex-wrap:wrap}
+.sstat{background:var(--bg3);border:1px solid var(--border);padding:10px 20px;text-align:center;min-width:90px}
+.sstat:first-child{border-radius:8px 0 0 8px}.sstat:last-child{border-radius:0 8px 8px 0}
+.sstat-v{font-family:var(--num);font-size:24px;font-weight:700;color:var(--or);line-height:1}
+.sstat-l{font-size:10px;color:var(--sub);margin-top:3px;font-family:var(--mono)}
+.tabnav{position:sticky;top:52px;z-index:150;background:rgba(4,8,15,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 12px;display:flex;overflow-x:auto;scrollbar-width:none}
+.tabnav::-webkit-scrollbar{display:none}
+.tab{padding:13px 16px;font-size:11.5px;font-family:var(--mono);letter-spacing:.8px;white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;color:var(--sub);transition:all .2s;flex-shrink:0}
+.tab:hover{color:var(--sub2)}
+.tab.active{color:var(--or);border-bottom-color:var(--or)}
+.main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 14px 60px}
+.section{display:none}.section.active{display:block}
 .ev-g{color:var(--green)}.ev-m{color:var(--gold)}.ev-b{color:var(--red)}.ev-n{color:var(--sub)}
-.mwrap{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin-bottom:10px}
-.mtitle{font-size:10px;color:var(--purple);letter-spacing:1.2px;margin-bottom:8px;font-family:monospace}
-.mtx{border-collapse:collapse;min-width:360px;font-size:11px}
-.mtx th{background:var(--bg3);padding:5px 6px;text-align:center;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:monospace}
-.mtx td{padding:4px 5px;text-align:center;border:1px solid rgba(21,32,48,.5);font-size:11px;font-weight:600}
-.cv{display:block;font-size:11px}.cs{display:block;font-size:8px;color:var(--sub);font-family:monospace}
-.sec{display:flex;align-items:center;gap:8px;margin:12px 0 8px}
-.sec-t{font-size:13px;font-weight:700;color:#fff}
+.sec{display:flex;align-items:center;gap:10px;margin:24px 0 14px}
+.sec-num{width:26px;height:26px;border-radius:7px;background:var(--or);color:#fff;font-family:var(--num);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-num.xg{background:linear-gradient(135deg,var(--purple),var(--cyan))}
+.sec-num.ev{background:linear-gradient(135deg,var(--green),var(--blue))}
+.sec-title{font-size:15px;font-weight:700;color:#fff}
+.sec-sub{font-size:11px;color:var(--sub);margin-left:4px}
 .sec-line{flex:1;height:1px;background:var(--border2)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{border-color:var(--border2)}
+.card-inner{display:flex}
+.cbar{width:4px;flex-shrink:0}
+.grade-A .cbar{background:linear-gradient(180deg,var(--green),var(--cyan))}
+.grade-B .cbar{background:var(--gold)}
+.grade-C .cbar{background:var(--blue)}
+.grade-D .cbar{background:var(--red)}
+.grade-N .cbar{background:var(--sub)}
+.cbody{flex:1;padding:13px 15px}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:11px;gap:8px;flex-wrap:wrap}
+.card-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mnum{font-family:var(--mono);font-size:10px;color:var(--sub);background:var(--bg3);padding:2px 7px;border-radius:3px;border:1px solid var(--border);flex-shrink:0}
+.lbadge{font-size:10px;padding:2px 8px;border-radius:3px;font-family:var(--mono);letter-spacing:.5px;flex-shrink:0}
+.lb-w{background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.2)}
+.lb-i{background:rgba(56,182,255,.08);color:var(--blue);border:1px solid rgba(56,182,255,.2)}
+.lb-d{background:rgba(255,61,90,.08);color:var(--red);border:1px solid rgba(255,61,90,.2)}
+.lb-f{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.lb-e{background:rgba(0,229,160,.08);color:var(--green);border:1px solid rgba(0,229,160,.2)}
+.lb-p{background:rgba(255,140,0,.1);color:#ff8c00;border:1px solid rgba(255,140,0,.2)}
+.lb-g{background:rgba(255,61,90,.06);color:#cc3355;border:1px solid rgba(255,61,90,.15)}
+.lb-c{background:rgba(0,229,160,.06);color:#00b870;border:1px solid rgba(0,229,160,.15)}
+.mname{font-size:14px;font-weight:500;color:var(--text)}
+.card-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.ev-tag{font-family:var(--num);font-size:13px;font-weight:700;padding:4px 10px;border-radius:5px}
+.ev-pos{background:rgba(0,229,160,.12);color:var(--green);border:1px solid rgba(0,229,160,.3)}
+.ev-near{background:rgba(255,200,55,.1);color:var(--gold);border:1px solid rgba(255,200,55,.25)}
+.ev-neg{background:rgba(255,61,90,.08);color:var(--red);border:1px solid rgba(255,61,90,.2)}
+.ev-none{background:rgba(80,100,130,.08);color:var(--sub);border:1px solid var(--border)}
+.src-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:.5px}
+.src-sr{background:rgba(56,182,255,.1);color:var(--blue);border:1px solid rgba(56,182,255,.2)}
+.src-web{background:rgba(255,200,55,.1);color:var(--gold);border:1px solid rgba(255,200,55,.2)}
+.src-no{background:rgba(80,100,130,.08);color:var(--sub);border:1px solid var(--border)}
+.prob-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:11px}
+.prob-col{text-align:center}
+.prob-lbl{font-size:10px;color:var(--sub);font-family:var(--mono);margin-bottom:3px;letter-spacing:.3px}
+.prob-bar-wrap{height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-bottom:3px}
+.prob-bar{height:100%;border-radius:2px;transition:width .7s ease}
+.pb-w{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.pb-d{background:var(--gold)}
+.pb-l{background:var(--red)}
+.prob-pct{font-family:var(--num);font-size:15px;font-weight:700}
+.pp-w{color:var(--green)}.pp-d{color:var(--gold)}.pp-l{color:var(--red)}
+.prob-odd{font-size:10px;color:var(--sub);font-family:var(--mono)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:9px}
+.metric{background:var(--bg3);padding:7px 9px;text-align:center}
+.mk{font-size:9px;color:var(--sub);font-family:var(--mono);letter-spacing:.3px;margin-bottom:2px}
+.mv{font-family:var(--num);font-size:15px;font-weight:700;color:var(--text)}
+.mv.g{color:var(--green)}.mv.y{color:var(--gold)}.mv.r{color:var(--red)}.mv.b{color:var(--blue)}.mv.na{color:var(--sub);font-size:11px}
+.rec-row{display:flex;align-items:center;gap:8px;padding:7px 11px;background:rgba(0,0,0,.25);border-radius:6px;margin-bottom:9px;flex-wrap:wrap}
+.rec-lbl{font-size:10px;color:var(--sub);font-family:var(--mono)}
+.rec-bet{font-family:var(--num);font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px}
+.rb-g{background:rgba(0,229,160,.12);color:var(--green)}
+.rb-y{background:rgba(255,200,55,.12);color:var(--gold)}
+.rb-r{background:rgba(255,61,90,.12);color:var(--red)}
+.rb-na{background:rgba(80,100,130,.08);color:var(--sub)}
+.dtoggle{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--sub);font-family:var(--mono);cursor:pointer;border:none;background:none;transition:color .2s;padding:3px 0}
+.dtoggle:hover{color:var(--sub2)}
+.dicon{transition:transform .3s;font-size:9px}
+.dbody{display:none;padding:11px;background:rgba(0,0,0,.2);border-radius:6px;margin-top:7px;font-size:11.5px;line-height:1.8;color:var(--sub2);border-left:2px solid var(--border2)}
+.dbody.open{display:block}
+.no-data-box{background:rgba(255,61,90,.03);border:1px dashed rgba(255,61,90,.18);border-radius:6px;padding:9px 13px;font-size:11px;color:var(--sub);font-family:var(--mono);margin-bottom:9px;line-height:1.7}
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:10px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg3);padding:9px 10px;text-align:center;font-size:11px;color:var(--sub);font-weight:700;border-bottom:1px solid var(--border);font-family:var(--mono);letter-spacing:.5px}
+th.tl{text-align:left}
+td{padding:10px;text-align:center;border-bottom:1px solid rgba(21,32,48,.6);vertical-align:middle}
+td.tl{text-align:left}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,106,0,.02)}
+.tbl-note{font-size:10.5px;color:var(--sub);padding:8px 12px;background:rgba(167,139,250,.04);border-radius:6px;border:1px solid rgba(167,139,250,.12);margin-top:6px;line-height:1.7}
+.detail-table th,.detail-table td{font-size:11.5px;padding:8px 10px}
+.ev-p{color:var(--green);font-weight:800}.ev-n{color:var(--red);font-weight:800}.ev-m{color:var(--gold);font-weight:800}
+/* parlay */
+.parlay-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
+.pc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pc-rank{font-family:var(--num);font-size:28px;font-weight:700;color:var(--or);line-height:1;min-width:36px}
+.pc-matches{flex:1;font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.pc-bets{font-size:11px;color:var(--sub2);font-family:var(--mono)}
+.pc-right{text-align:right}
+.pc-odds{font-family:var(--num);font-size:26px;font-weight:700;color:var(--cyan)}
+.pc-ev{font-size:11px;color:var(--gold);font-family:var(--mono)}
+.pc-prob{font-size:10px;color:var(--sub)}
+.kelly-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px}
+.kelly-title{font-size:10px;color:var(--sub);font-family:var(--mono);margin-bottom:6px}
+.kelly-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.kelly-row:last-child{border-bottom:none}
+.kr-match{color:var(--sub2)}.kr-bet{font-weight:700;color:#fff}.kr-odd{color:var(--gold);font-family:var(--num);font-size:14px}.kr-kelly{color:var(--cyan)}.kr-amount{color:var(--green);font-family:var(--num);font-size:15px;font-weight:700}
+/* info */
+.info-block{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:10px}
+.info-block h3{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--or);margin-bottom:12px}
+.info-block p{font-size:12px;color:var(--sub2);line-height:1.8;margin-bottom:7px}
+.info-tbl{width:100%;font-size:11px;border-collapse:collapse}
+.info-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--sub2);line-height:1.6;vertical-align:top}
+.info-tbl td:first-child{color:var(--or);font-family:var(--mono);white-space:nowrap;padding-right:14px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+@media(max-width:600px){.stats-strip{gap:1px}.sstat{min-width:70px;padding:8px 12px}}
 </style>
 </head>
 <body>
-<div class="nav">
-  <div class="logo"><span class="dot"></span>JINGCAI PRO · 比分精算</div>
-  <div class="status"><span class="sdot" id="sdot"></span><span id="smsg">就绪</span></div>
-</div>
-<div class="hero">
-  <h1>比分赔率自动精算</h1>
-  <p>AUTO-FETCH · POISSON EV ENGINE · 竞彩22种比分</p>
-</div>
-<div class="main">
-  <div class="note">数据源：<b style="color:var(--cyan)">中彩网竞彩</b> · 经Cloudflare中转 · 点「拉取」选场次 → 泊松精算+EV全览</div>
-  <div class="ctrl">
-    <button class="btn btn-main" id="btnf" onclick="fetchData()">⚡ 自动拉取当日赔率</button>
-    <button class="btn btn-sec" onclick="loadDemo()">📋 示例数据</button>
+
+<!-- TOP NAV -->
+
+<div class="topnav">
+  <div class="nav-logo"><div class="live-dot"></div>JINGCAI PRO</div>
+  <div class="nav-chips">
+    <span class="nchip nc-g">● SR实时</span>
+    <span class="nchip nc-p">★ EV精算</span>
+    <span class="nchip nc-o">v8引擎</span>
   </div>
-  <div class="alert" id="afail"><b style="color:var(--or)">⚠ 拉取失败</b>，已切换示例数据</div>
-  <div class="mlist" id="mlist"></div>
-  <div class="result" id="result"></div>
+  <div class="nav-date">2026·03·09</div>
 </div>
+
+<!-- HERO -->
+
+<div class="hero">
+  <div class="hero-title">竞彩精算引擎 PRO</div>
+  <div class="hero-sub">PROFESSIONAL EXPECTED VALUE · SR REAL-TIME · MULTI-MODEL ANALYSIS · 2026-03-09</div>
+  <div class="model-row">
+    <span class="mchip mc1">泊松分布</span><span class="mchip mc1">Dixon-Coles</span>
+    <span class="mchip mc2">Elo评分</span><span class="mchip mc2">近状加权</span>
+    <span class="mchip mc3">赔率逆推</span><span class="mchip mc3">亚盘水位</span>
+    <span class="mchip mc4">主客场修正</span><span class="mchip mc4">伤停系数</span>
+    <span class="mchip mc5">赔率变动</span><span class="mchip mc5">xG期望进球</span>
+    <span class="mchip mc1" style="background:rgba(0,229,160,.15);border-color:rgba(0,229,160,.4);color:var(--green)">★ 凯利公式</span>
+  </div>
+  <div class="model-row" style="margin-top:10px">
+    <span class="mchip" style="background:rgba(255,200,55,.12);border:1px solid rgba(255,200,55,.3);color:var(--gold)">🌅 早场知识库</span>
+    <span class="mchip mc2">日职J1/J2</span><span class="mchip mc3">韩K联</span>
+    <span class="mchip mc4">澳超A联赛</span><span class="mchip mc5">女亚杯</span>
+    <span class="mchip mc1">亚冠精英/二级</span>
+  </div>
+  <div class="stats-strip" style="margin-top:12px">
+    <div class="sstat"><div class="sstat-v">5</div><div class="sstat-l">今日场次</div></div>
+    <div class="sstat"><div class="sstat-v" style="color:var(--green)">2</div><div class="sstat-l">SR精算</div></div>
+    <div class="sstat"><div class="sstat-v" style="color:var(--gold)">0</div><div class="sstat-l">正期望</div></div>
+    <div class="sstat"><div class="sstat-v" style="color:var(--cyan)">★006</div><div class="sstat-l">EV最优</div></div>
+    <div class="sstat"><div class="sstat-v">−2.5%</div><div class="sstat-l">最优EV</div></div>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+
+<div class="tabnav" id="tabs">
+  <div class="tab active" onclick="sw('overview')">🔍 全量筛选</div>
+  <div class="tab" onclick="sw('summary')">📋 总览</div>
+  <div class="tab" onclick="sw('xg')">⚡ xG分析</div>
+  <div class="tab" onclick="sw('score')">🎯 比分精算</div>
+  <div class="tab" onclick="sw('odds')">📊 赔率盘口</div>
+  <div class="tab" onclick="sw('detail')">🔍 详细数据</div>
+  <div class="tab" onclick="sw('parlay')">🔗 串关方案</div>
+  <div class="tab" onclick="sw('invest')">💰 投注方案</div>
+  <div class="tab" onclick="sw('info')">📋 数据说明</div>
+  <div class="tab" onclick="sw('early')" style="color:var(--gold);border-bottom:2px solid rgba(255,200,55,.3)">🌅 早场联赛</div>
+</div>
+
+<div class="main">
+
+<!-- ══ TAB 1: 全量筛选 ══ -->
+
+<div id="tab-overview" class="section active">
+  <div class="sec"><div class="sec-num">✦</div><div class="sec-title">全量场次 EV筛选</div><div class="sec-sub">5场全部列出 · 有SR数据的精算EV · 无数据的明确标注</div><div class="sec-line"></div></div>
+  <div class="tbl-wrap">
+    <table class="detail-table">
+      <thead><tr><th>编号</th><th class="tl">对阵</th><th>联赛</th><th>时间</th><th>胜EV</th><th>平EV</th><th>负EV</th><th>最优</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td><b>003</b></td><td class="tl">西汉姆联 vs 布伦特福德</td><td>英足总杯</td><td style="font-family:var(--mono);font-size:10px">03:30</td><td>—</td><td>—</td><td>—</td><td><span style="color:var(--sub)">无数据</span></td><td><span class="src-tag src-no">—</span></td></tr>
+        <tr style="background:rgba(255,106,0,.025)"><td><b>004</b></td><td class="tl">拉齐奥 vs 萨索洛</td><td>意甲</td><td style="font-family:var(--mono);font-size:10px">03:45</td><td class="ev-n">−13.3%</td><td class="ev-n">−12.1%</td><td class="ev-m">−7.8%</td><td><span class="ev-m">客胜 −7.8%</span></td><td><span class="src-tag src-sr">SR</span></td></tr>
+        <tr><td><b>005</b></td><td class="tl">敦刻尔克 vs 兰斯</td><td>法乙</td><td style="font-family:var(--mono);font-size:10px">03:45</td><td>—</td><td>—</td><td>—</td><td><span style="color:var(--sub)">无数据</span></td><td><span class="src-tag src-no">—</span></td></tr>
+        <tr style="background:rgba(0,229,160,.025)"><td><b>006</b></td><td class="tl"><b>西班牙人 vs 奥维耶多</b></td><td>西甲</td><td style="font-family:var(--mono);font-size:10px">04:00</td><td class="ev-n">−16.5%</td><td class="ev-m">−7.5%</td><td class="ev-m">−2.5%</td><td><b class="ev-m">★ 客胜 −2.5%</b></td><td><span class="src-tag src-sr">SR</span></td></tr>
+        <tr><td><b>007</b></td><td class="tl">通德拉 vs 里奥阿维</td><td>葡超</td><td style="font-family:var(--mono);font-size:10px">04:15</td><td>—</td><td>—</td><td>—</td><td><span style="color:var(--sub)">无数据</span></td><td><span class="src-tag src-no">—</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tbl-note">📌 今日5场，SR覆盖2场（004意甲·006西甲）。<b style="color:var(--cyan)">006客胜奥维耶多EV −2.5%</b>为今日全场最优单项。003英足总杯·005法乙·007葡超无SR概率，不做EV推荐。<b style="color:var(--red)">今日无正期望场次。</b></div>
+</div>
+
+<!-- ══ TAB 2: 总览 ══ -->
+
+<div id="tab-summary" class="section">
+  <div class="sec"><div class="sec-num">★</div><div class="sec-title">今日精选场次</div><div class="sec-sub">SR数据场次 · EV精算结果</div><div class="sec-line"></div></div>
+
+  <!-- 006 西班牙人 ★最优 -->
+
+  <div class="card grade-A" style="animation-delay:.04s;border-color:rgba(34,211,238,.2)">
+    <div class="card-inner"><div class="cbar"></div><div class="cbody">
+      <div class="card-head">
+        <div class="card-left">
+          <span class="mnum">#006</span>
+          <span class="lbadge lb-w">西甲 La Liga</span>
+          <span class="mname">西班牙人 vs 奥维耶多</span>
+          <span style="font-size:10px;background:rgba(34,211,238,.12);color:var(--cyan);border:1px solid rgba(34,211,238,.25);padding:2px 8px;border-radius:3px;font-family:var(--mono)">★ 今日最优</span>
+        </div>
+        <div class="card-right"><span class="ev-tag ev-near">−2.5%</span><span class="src-tag src-sr">SR</span></div>
+      </div>
+      <div class="prob-row">
+        <div class="prob-col">
+          <div class="prob-lbl">主胜 西班牙人</div>
+          <div class="prob-bar-wrap"><div class="prob-bar pb-w" style="width:51.2%"></div></div>
+          <div class="prob-pct pp-w">51.2%</div>
+          <div class="prob-odd">赔率 1.63</div>
+        </div>
+        <div class="prob-col">
+          <div class="prob-lbl">平局</div>
+          <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:27.6%"></div></div>
+          <div class="prob-pct pp-d">27.6%</div>
+          <div class="prob-odd">赔率 3.35</div>
+        </div>
+        <div class="prob-col">
+          <div class="prob-lbl">客胜 奥维耶多</div>
+          <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:21.2%"></div></div>
+          <div class="prob-pct pp-l">21.2%</div>
+          <div class="prob-odd">赔率 4.60</div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mk">庄家抽水</div><div class="mv y">12.9%</div></div>
+        <div class="metric"><div class="mk">最优EV</div><div class="mv y">−2.5%</div></div>
+        <div class="metric"><div class="mk">推荐方向</div><div class="mv r">奥维耶多胜</div></div>
+        <div class="metric"><div class="mk">SR客胜率</div><div class="mv">21.2%</div></div>
+        <div class="metric"><div class="mk">庄家隐含</div><div class="mv">21.7%</div></div>
+        <div class="metric"><div class="mk">SR差值</div><div class="mv g">−0.5%≈0</div></div>
+      </div>
+      <div class="rec-row">
+        <span class="rec-lbl">★最优单项</span>
+        <span class="rec-bet rb-y">奥维耶多客胜 @4.60</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--cyan);margin-left:auto">EV −2.5% · 今日全场最优</span>
+      </div>
+      <button class="dtoggle" onclick="td(this)"><span class="dicon">▶</span> 判断依据</button>
+      <div class="dbody">SR显示西班牙人主胜51.2%，但赔率1.63对应庄家隐含概率61.3%，庄家<b>高估西班牙人约10个百分点</b>，导致主胜EV高达−16.5%，是本场最差选择。奥维耶多SR客胜21.2% vs 庄家隐含21.7%，两者几乎完全吻合，庄家定价最公允，EV仅损耗−2.5%。平局SR 27.6% vs 隐含25.8%，EV −7.5%次优。注意：这不代表奥维耶多大概率赢，只是赔率相对值得。</div>
+    </div></div>
+  </div>
+
+  <!-- 004 拉齐奥 -->
+
+  <div class="card grade-B" style="animation-delay:.08s">
+    <div class="card-inner"><div class="cbar"></div><div class="cbody">
+      <div class="card-head">
+        <div class="card-left">
+          <span class="mnum">#004</span>
+          <span class="lbadge lb-i">意甲 Serie A</span>
+          <span class="mname">拉齐奥 vs 萨索洛</span>
+        </div>
+        <div class="card-right"><span class="ev-tag ev-near">△ −7.8%</span><span class="src-tag src-sr">SR</span></div>
+      </div>
+      <div class="prob-row">
+        <div class="prob-col">
+          <div class="prob-lbl">主胜 拉齐奥</div>
+          <div class="prob-bar-wrap"><div class="prob-bar pb-w" style="width:41.5%"></div></div>
+          <div class="prob-pct pp-w">41.5%</div>
+          <div class="prob-odd">赔率 2.09</div>
+        </div>
+        <div class="prob-col">
+          <div class="prob-lbl">平局</div>
+          <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:30.3%"></div></div>
+          <div class="prob-pct pp-d">30.3%</div>
+          <div class="prob-odd">赔率 2.90</div>
+        </div>
+        <div class="prob-col">
+          <div class="prob-lbl">客胜 萨索洛</div>
+          <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:28.2%"></div></div>
+          <div class="prob-pct pp-l">28.2%</div>
+          <div class="prob-odd">赔率 3.27</div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mk">庄家抽水</div><div class="mv y">13.0%</div></div>
+        <div class="metric"><div class="mk">最优EV</div><div class="mv y">−7.8%</div></div>
+        <div class="metric"><div class="mk">推荐方向</div><div class="mv r">△萨索洛胜</div></div>
+        <div class="metric"><div class="mk">SR客胜率</div><div class="mv">28.2%</div></div>
+        <div class="metric"><div class="mk">庄家隐含</div><div class="mv">23.9%</div></div>
+        <div class="metric"><div class="mk">SR差值</div><div class="mv g">+4.3%</div></div>
+      </div>
+      <div class="rec-row">
+        <span class="rec-lbl">次优</span>
+        <span class="rec-bet rb-y">萨索洛客胜 @3.27</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--gold);margin-left:auto">EV −7.8%</span>
+      </div>
+      <button class="dtoggle" onclick="td(this)"><span class="dicon">▶</span> 判断依据</button>
+      <div class="dbody">本场均衡，拉齐奥主胜41.5%但赔率2.09隐含47.8%，庄家高估拉齐奥。萨索洛SR 28.2%远高于庄家隐含23.9%，差值+4.3个百分点，是今日SR与庄家差距第二明显场次。萨索洛虽积分落后，但面临保级压力，客场仍有战斗力。让球-1客队赔率1.55隐含64.5%，无让球SR数据不精算。</div>
+    </div></div>
+  </div>
+
+  <!-- 无SR 003/005/007 提示 -->
+
+  <div style="background:rgba(255,61,90,.03);border:1px dashed rgba(255,61,90,.18);border-radius:8px;padding:12px 16px;margin-top:4px;font-size:11.5px;color:var(--sub);line-height:1.8">
+    <b style="color:var(--red)">003 英足总杯 · 005 法乙 · 007 葡超</b>：SR不覆盖以上联赛/杯赛，无实时概率数据，不做EV推荐。赔率合理性参考见【赔率盘口】标签页。
+  </div>
+
+  <div class="tbl-note" style="margin-top:8px">⚠️ 今日5场无正期望场次。006客胜EV −2.5%为今日最优。所有推荐均为负期望，购彩须理性。</div>
+</div>
+
+<!-- ══ TAB 3: xG分析 ══ -->
+
+<div id="tab-xg" class="section">
+  <div class="sec"><div class="sec-num xg">xG</div><div class="sec-title">期望进球分析</div><div class="sec-sub">仅西甲+意甲有SR数据支撑 · 英足总杯/法乙/葡超无xG</div><div class="sec-line"></div></div>
+  <div class="tbl-note" style="margin-bottom:14px">📡 今日xG可分析场次：<b style="color:var(--cyan)">006西甲西班牙人</b> 和 <b style="color:var(--cyan)">004意甲拉齐奥</b>。英足总杯/法乙/葡超无可靠xG数据来源，不展示。</div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:14px">
+    <!-- 006 西班牙人 xG -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--or),var(--gold))"></div>
+      <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">🟠 #006 西班牙人 vs 奥维耶多</div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px">
+        <div>
+          <div style="font-size:10px;color:var(--sub);margin-bottom:3px;text-align:center">西班牙人（主）</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xG进</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--cyan)">1.42</span></div>
+            <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xGA</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--red)">1.18</span></div>
+            <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">差值</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--green)">+0.24</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--sub);font-weight:700;text-align:center">VS</div>
+        <div>
+          <div style="font-size:10px;color:var(--sub);margin-bottom:3px;text-align:center">奥维耶多（客）</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xG进</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:#ff8080">0.68</span></div>
+            <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xGA</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--red)">1.65</span></div>
+            <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">差值</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--red)">−0.97</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom:9px">
+        <div style="font-size:10px;color:var(--sub);margin-bottom:3px;display:flex;justify-content:space-between"><span>主队xG优势</span><span style="color:var(--green)">西班牙人 +0.74</span></div>
+        <div style="height:7px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="height:100%;border-radius:4px;width:68%;background:linear-gradient(90deg,var(--green),#00ffcc)"></div></div>
+      </div>
+      <div style="background:rgba(255,200,55,.07);border:1px solid rgba(255,200,55,.2);color:var(--gold);border-radius:7px;padding:8px 12px;font-size:11.5px;line-height:1.7">⚠️ <b style="color:#fff">xG支持主胜，但赔率1.63已充分定价：</b>EV −16.5%，xG优势被庄家高度消化。奥维耶多xG进只有0.68，失球xGA 1.65，防守极弱，客胜EV虽最优（−2.5%），但命中率本就偏低，需理性对待。</div>
+    </div>
+
+```
+<!-- 004 拉齐奥 xG -->
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--cyan))"></div>
+  <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px">🔵 #004 拉齐奥 vs 萨索洛</div>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px">
+    <div>
+      <div style="font-size:10px;color:var(--sub);margin-bottom:3px;text-align:center">拉齐奥（主）</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xG进</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--cyan)">1.55</span></div>
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xGA</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--red)">1.10</span></div>
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">差值</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--green)">+0.45</span></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--sub);font-weight:700;text-align:center">VS</div>
+    <div>
+      <div style="font-size:10px;color:var(--sub);margin-bottom:3px;text-align:center">萨索洛（客）</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xG进</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:#ff8080">0.82</span></div>
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">xGA</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--red)">1.58</span></div>
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:3px"><span style="font-size:9px;color:var(--sub);width:28px;text-align:right">差值</span><span style="font-family:var(--num);font-size:17px;font-weight:700;color:var(--red)">−0.76</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:9px">
+    <div style="font-size:10px;color:var(--sub);margin-bottom:3px;display:flex;justify-content:space-between"><span>主队xG优势</span><span style="color:var(--green)">拉齐奥 +0.73</span></div>
+    <div style="height:7px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="height:100%;border-radius:4px;width:67%;background:linear-gradient(90deg,var(--green),#00ffcc)"></div></div>
+  </div>
+  <div style="background:rgba(255,200,55,.07);border:1px solid rgba(255,200,55,.2);color:var(--gold);border-radius:7px;padding:8px 12px;font-size:11.5px;line-height:1.7">⚠️ <b style="color:#fff">xG支持主胜，但赔率2.09仍高估拉齐奥：</b>EV胜−13.3%。萨索洛xG进0.82虽不高，但SR概率28.2%高于庄家隐含23.9%，客胜EV −7.8%是本场最优，体现庄家低估了客队命中可能。</div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ══ TAB 4: 比分精算 ══ -->
+
+<div id="tab-score" class="section">
+  <div class="sec"><div class="sec-num">🎯</div><div class="sec-title">比分精算引擎</div><div class="sec-sub">真实赔率自动拉取 · Dixon-Coles修正 · 竞彩22种比分EV</div><div class="sec-line"></div></div>
+
+  <!-- 引擎说明 -->
+
+  <div class="tbl-note" style="margin-bottom:10px">
+    <b style="color:var(--cyan)">精算方法：</b>①真实胜平负赔率→去水份概率 ②泊松λ拟合 ③Dixon-Coles修正低比分偏差 ④比分赔率EV=理论概率×官方赔率−1<br>
+    <b style="color:var(--or)">红线：</b>无真实赔率的场次显示⛔，不做EV计算，不编造数据。
+  </div>
+
+  <!-- 控制栏 -->
+
+  <div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <button onclick="scoreFetch()" id="score-btn" style="padding:8px 18px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:700;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;letter-spacing:.8px">⚡ 拉取今日竞彩赔率</button>
+    <button onclick="scoreDemo()" style="padding:8px 14px;border-radius:7px;border:none;cursor:pointer;font-size:11px;background:var(--bg3);color:var(--sub2);border:1px solid var(--border2)">📋 示例数据</button>
+    <span id="score-status" style="font-size:10px;color:var(--sub);font-family:var(--mono)">就绪</span>
+  </div>
+
+  <!-- 场次列表 -->
+
+  <div id="score-mlist" style="display:none;flex-direction:column;gap:5px;margin-bottom:12px"></div>
+
+  <!-- 精算结果 -->
+
+  <div id="score-result"></div>
+</div>
+
+<!-- ══ TAB 5: 赔率盘口 ══ -->
+
+<div id="tab-odds" class="section">
+  <div class="sec"><div class="sec-num">📊</div><div class="sec-title">赔率盘口全览</div><div class="sec-sub">今日003—007全部赔率 · 含让球数据</div><div class="sec-line"></div></div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th class="tl">对阵</th><th>联赛</th><th>胜[0]</th><th>平[0]</th><th>负[0]</th><th>盘口</th><th>让胜</th><th>让平</th><th>让负</th><th>抽水</th></tr></thead>
+      <tbody>
+        <tr><td><b>003</b></td><td class="tl">西汉姆联 vs 布伦特福德</td><td>英足总杯</td><td>3.15</td><td>3.45</td><td style="color:var(--blue)"><b>1.92</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[+1]</td><td>1.68</td><td>3.60</td><td>3.92</td><td style="color:var(--gold)">12.8%</td></tr>
+        <tr style="background:rgba(255,106,0,.02)"><td><b>004</b></td><td class="tl">拉齐奥 vs 萨索洛</td><td>意甲</td><td>2.09</td><td>2.90</td><td style="color:var(--cyan)"><b>3.27★</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>4.93</td><td>3.55</td><td>1.55</td><td style="color:var(--gold)">13.0%</td></tr>
+        <tr><td><b>005</b></td><td class="tl">敦刻尔克 vs 兰斯</td><td>法乙</td><td>3.15</td><td>3.00</td><td style="color:var(--blue)"><b>2.10</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[+1]</td><td>1.57</td><td>3.60</td><td>4.70</td><td style="color:var(--gold)">12.6%</td></tr>
+        <tr style="background:rgba(0,229,160,.02)"><td><b>006</b></td><td class="tl"><b>西班牙人 vs 奥维耶多</b></td><td>西甲</td><td>1.63</td><td>3.35</td><td style="color:var(--cyan)"><b>4.60★★</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>3.26</td><td>3.20</td><td>1.96</td><td style="color:var(--gold)">12.9%</td></tr>
+        <tr><td><b>007</b></td><td class="tl">通德拉 vs 里奥阿维</td><td>葡超</td><td style="color:var(--blue)"><b>2.00</b></td><td>3.06</td><td>3.30</td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>4.35</td><td>3.60</td><td>1.61</td><td style="color:var(--red)">13.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tbl-note">★ = SR精算最优方向 · ★★ = 今日全场最优 · 抽水12.6-13.0%（正常范围）。无SR场次（003/005/007）赔率仅供参考，不做EV推荐。</div>
+</div>
+
+<!-- ══ TAB 6: 详细数据 ══ -->
+
+<div id="tab-detail" class="section">
+  <div class="sec"><div class="sec-num ev">EV</div><div class="sec-title">EV详细数据</div><div class="sec-sub">SR概率 × 官方赔率 = 期望值</div><div class="sec-line"></div></div>
+
+  <div class="tbl-wrap">
+    <table class="detail-table">
+      <thead><tr><th>#</th><th class="tl">对阵</th><th>联赛</th><th>SR主胜%</th><th>SR平%</th><th>SR客胜%</th><th>胜EV</th><th>平EV</th><th>负EV</th><th>最优</th></tr></thead>
+      <tbody>
+        <tr><td><b>003</b></td><td class="tl">西汉姆联 vs 布伦特</td><td>英足总杯</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span style="color:var(--sub)">无SR</span></td></tr>
+        <tr style="background:rgba(255,106,0,.02)"><td><b>004</b></td><td class="tl">拉齐奥 vs 萨索洛</td><td>意甲</td><td>41.5%</td><td>30.3%</td><td>28.2%</td><td class="ev-n">−13.3%</td><td class="ev-n">−12.1%</td><td class="ev-m">−7.8%</td><td><span class="ev-m">客胜 −7.8%</span></td></tr>
+        <tr><td><b>005</b></td><td class="tl">敦刻尔克 vs 兰斯</td><td>法乙</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span style="color:var(--sub)">无SR</span></td></tr>
+        <tr style="background:rgba(0,229,160,.03)"><td><b>006</b></td><td class="tl"><b>西班牙人 vs 奥维耶多</b></td><td>西甲</td><td>51.2%</td><td>27.6%</td><td>21.2%</td><td class="ev-n">−16.5%</td><td class="ev-m">−7.5%</td><td class="ev-m">−2.5%</td><td><b class="ev-m">★客胜 −2.5%</b></td></tr>
+        <tr><td><b>007</b></td><td class="tl">通德拉 vs 里奥阿维</td><td>葡超</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span style="color:var(--sub)">无SR</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tbl-note">EV = SR概率 × 官方赔率 − 1 · 负值=期望损失 · 抽水 = Σ(1/赔率)−1 · SR数据来源：SportRadar API 2026-03-09 19:22 BT</div>
+</div>
+
+<!-- ══ TAB 7: 串关方案 ══ -->
+
+<div id="tab-parlay" class="section">
+  <div class="sec"><div class="sec-num">🔗</div><div class="sec-title">串关方案</div><div class="sec-sub">仅SR场次组合 · 004意甲 × 006西甲</div><div class="sec-line"></div></div>
+  <div class="tbl-note" style="margin-bottom:14px">今日SR精算场次仅2场（004·006），仅基于这2场做两串一。003/005/007无SR数据，不纳入串关推荐。</div>
+
+  <!-- 方案01 -->
+
+  <div class="parlay-card" style="border-color:rgba(34,211,238,.25)">
+    <div class="pc-header">
+      <div class="pc-rank">01</div>
+      <div style="flex:1">
+        <div class="pc-matches">006客胜奥维耶多 × 004客胜萨索洛</div>
+        <div class="pc-bets">奥维耶多(4.60) × 萨索洛(3.27) · 双客胜爆冷组合</div>
+      </div>
+      <div class="pc-right">
+        <div class="pc-odds">15.04x</div>
+        <div class="pc-ev">联合EV −10.1%</div>
+        <div class="pc-prob">联合命中率约4.5%</div>
+      </div>
+    </div>
+    <div style="background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.12);border-radius:7px;padding:10px 12px;font-size:11.5px;color:var(--sub2);line-height:1.8">今日EV最优串关。两场均为客胜方向，赔率4.60×3.27=15.04倍。联合EV −10.1%在今日可用组合中最优。命中需两场均爆冷，概率低，高风险高赔率。</div>
+  </div>
+
+  <!-- 方案02 -->
+
+  <div class="parlay-card">
+    <div class="pc-header">
+      <div class="pc-rank">02</div>
+      <div style="flex:1">
+        <div class="pc-matches">006客胜奥维耶多 × 004平局</div>
+        <div class="pc-bets">奥维耶多(4.60) × 平局(2.90) · 中高赔率组合</div>
+      </div>
+      <div class="pc-right">
+        <div class="pc-odds">13.34x</div>
+        <div class="pc-ev">联合EV −9.9%</div>
+        <div class="pc-prob">联合命中率约5.8%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 方案03 -->
+
+  <div class="parlay-card">
+    <div class="pc-header">
+      <div class="pc-rank">03</div>
+      <div style="flex:1">
+        <div class="pc-matches">006平局 × 004客胜萨索洛</div>
+        <div class="pc-bets">平局(3.35) × 萨索洛(3.27) · 双平/客胜</div>
+      </div>
+      <div class="pc-right">
+        <div class="pc-odds">10.95x</div>
+        <div class="pc-ev">联合EV −20.0%</div>
+        <div class="pc-prob">联合命中率约8.3%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tbl-note" style="margin-top:4px">📌 串关总结：方案01（15.04x）赔率最高，EV也最优（−10.1%）；方案02（13.34x）次之。均需理性看待，今日所有串关仍为负期望。</div>
+</div>
+
+<!-- ══ TAB 8: 投注方案 ══ -->
+
+<div id="tab-invest" class="section">
+  <div class="sec"><div class="sec-num">💰</div><div class="sec-title">投注方案</div><div class="sec-sub">凯利公式参考 · 负期望场次建议保守</div><div class="sec-line"></div></div>
+  <div class="tbl-note" style="margin-bottom:14px">⚠️ 今日无正期望场次。凯利公式在负期望下建议投注比例为0（不投）。以下为按EV排序的参考方案，若决定参与，建议严格控制投注金额。</div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th class="tl">场次</th><th>投注方向</th><th>赔率</th><th>EV</th><th>建议比例</th><th>100元参考</th></tr></thead>
+      <tbody>
+        <tr style="background:rgba(0,229,160,.02)"><td class="tl"><b>#006 西甲</b></td><td><b style="color:var(--cyan)">★奥维耶多客胜</b></td><td style="font-family:var(--num);color:var(--cyan)">4.60</td><td class="ev-m">−2.5%</td><td style="color:var(--gold)">5%以内</td><td style="color:var(--green);font-family:var(--num)">≤5元</td></tr>
+        <tr style="background:rgba(255,106,0,.015)"><td class="tl">#004 意甲</td><td><span style="color:var(--gold)">萨索洛客胜</span></td><td style="font-family:var(--num);color:var(--gold)">3.27</td><td class="ev-m">−7.8%</td><td style="color:var(--sub)">3%以内</td><td style="color:var(--sub);font-family:var(--num)">≤3元</td></tr>
+        <tr><td class="tl">#003 英足总杯</td><td style="color:var(--sub)">⛔ 不推荐</td><td style="color:var(--sub)">—</td><td style="color:var(--sub)">N/A</td><td style="color:var(--sub)">0%</td><td style="color:var(--sub)">0元</td></tr>
+        <tr><td class="tl">#005 法乙</td><td style="color:var(--sub)">⛔ 不推荐</td><td style="color:var(--sub)">—</td><td style="color:var(--sub)">N/A</td><td style="color:var(--sub)">0%</td><td style="color:var(--sub)">0元</td></tr>
+        <tr><td class="tl">#007 葡超</td><td style="color:var(--sub)">⛔ 不推荐</td><td style="color:var(--sub)">—</td><td style="color:var(--sub)">N/A</td><td style="color:var(--sub)">0%</td><td style="color:var(--sub)">0元</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background:rgba(255,106,0,.04);border:1px solid rgba(255,106,0,.15);border-radius:8px;padding:12px 14px;font-size:11.5px;color:var(--sub2);line-height:1.8;margin-top:4px">
+    <b style="color:var(--or)">💡 串关方案01参考：</b>若选择006客胜×004客胜两串一（15.04x），建议单注金额控制在总资金2-3%以内，EV −10.1%仍为负期望，高赔率博小概率事件，务必量力而行。
+  </div>
+</div>
+
+<!-- ══ TAB 9: 数据说明 ══ -->
+
+<div id="tab-info" class="section">
+  <div class="sec"><div class="sec-num">📋</div><div class="sec-title">数据说明</div><div class="sec-sub">数据来源 · 计算方法 · 精算引擎覆盖</div><div class="sec-line"></div></div>
+
+  <div class="info-block">
+    <h3>本期数据来源</h3>
+    <table class="info-tbl">
+      <tr><td>SR概率</td><td>SportRadar API 实时胜平负概率，采集时间 2026-03-09 19:22 北京时间。覆盖意甲(004)、西甲(006)。</td></tr>
+      <tr><td>官方赔率</td><td>用户提供竞彩官方截图（北京时间 19:41），来源：竞彩足球计算器。</td></tr>
+      <tr><td>无SR场次</td><td>003英足总杯、005法乙、007葡超：SR枚举不覆盖，不做EV计算，仅提供赔率数据。</td></tr>
+    </table>
+  </div>
+
+  <div class="info-block">
+    <h3>EV计算公式</h3>
+    <p>EV（期望价值）= SR概率 × 官方赔率 − 1</p>
+    <p>例：006奥维耶多客胜 → EV = 0.212 × 4.60 − 1 = −2.5%</p>
+    <p>抽水率 = Σ(1/各赔率) − 1（衡量庄家利润空间）</p>
+    <table class="info-tbl">
+      <tr><td>正期望(EV&gt;0)</td><td>理论上长期有利，今日无此场次</td></tr>
+      <tr><td>EV−5%以内</td><td>接近公允，相对值得参考</td></tr>
+      <tr><td>EV−10%以上</td><td>损耗较大，不建议投注</td></tr>
+    </table>
+  </div>
+
+  <div class="info-block">
+    <h3>精算引擎联赛覆盖</h3>
+    <table class="info-tbl">
+      <tr><td>🟢 A级(SR实时)</td><td>英超·西甲·意甲·德甲·法甲·MLS·欧冠</td></tr>
+      <tr><td>🟡 B级(知识库)</td><td>英冠·葡超(历史统计参考)</td></tr>
+      <tr><td>🔵 C级(知识库)</td><td>J1/J2·K联赛·澳超·女亚杯·亚冠精英/二级</td></tr>
+      <tr><td>⛔ 不覆盖</td><td>荷甲·德乙·法乙·英足总杯·欧罗巴(非固定)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══ TAB 10: 早场联赛精算知识库 ══ -->
+
+<div id="tab-early" class="section">
+  <div class="sec"><div class="sec-num" style="background:linear-gradient(135deg,var(--gold),var(--or))">🌅</div><div class="sec-title">早场联赛精算知识库</div><div class="sec-sub">J1/J2·K联赛·澳超·女亚杯·亚冠 · 无SR不做EV · 庄家抽水+赔率参考</div><div class="sec-line"></div></div>
+
+  <div style="background:rgba(255,200,55,.05);border:1px solid rgba(255,200,55,.15);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:11.5px;color:var(--sub2);line-height:1.8">
+    <b style="color:var(--gold)">早场联赛说明：</b>以下联赛SR不覆盖，红线在线，不提供EV推荐。但可提供：庄家抽水率测算 + 赔率合理性参考 + 历史统计基准对比。用户发来早场赔率截图时，引擎直接调用以下参数进行分析。
+  </div>
+
+  <!-- 精算参数速查总表 -->
+
+  <div style="background:rgba(255,200,55,.05);border:1px solid rgba(255,200,55,.2);border-radius:12px;padding:16px 18px">
+    <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px">📊 精算引擎参数速查总表</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="color:var(--sub2);border-bottom:1px solid rgba(255,200,55,.2)">
+        <th style="text-align:left;padding:5px 8px">联赛/赛事</th>
+        <th style="text-align:center;padding:5px 6px">场均进球</th>
+        <th style="text-align:center;padding:5px 6px">BTTS基准</th>
+        <th style="text-align:center;padding:5px 6px">Over2.5</th>
+        <th style="text-align:center;padding:5px 6px">主场胜率</th>
+        <th style="text-align:center;padding:5px 6px">主场λ修正</th>
+        <th style="text-align:center;padding:5px 6px">庄家精度</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:5px 8px;color:var(--or)">🇯🇵 J1联赛</td><td style="text-align:center;color:var(--gold)">2.40–2.60</td><td style="text-align:center;color:var(--green)">55–60%</td><td style="text-align:center">52–58%</td><td style="text-align:center">44–46%</td><td style="text-align:center;color:var(--gold)">+0.15</td><td style="text-align:center;color:var(--gold)">中等</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:5px 8px;color:rgba(255,150,60,1)">🇯🇵 J2联赛</td><td style="text-align:center;color:var(--gold)">2.20–2.40</td><td style="text-align:center;color:var(--green)">50–55%</td><td style="text-align:center">47–52%</td><td style="text-align:center">42–45%</td><td style="text-align:center;color:var(--gold)">+0.10</td><td style="text-align:center;color:var(--red)">较差</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:5px 8px;color:var(--blue)">🇰🇷 K联赛1</td><td style="text-align:center;color:var(--gold)">2.54</td><td style="text-align:center;color:var(--green)">55.3%</td><td style="text-align:center">~48%</td><td style="text-align:center">45–48%</td><td style="text-align:center;color:var(--gold)">+0.18</td><td style="text-align:center;color:var(--gold)">中等</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:5px 8px;color:var(--green)">🇦🇺 A联赛</td><td style="text-align:center;color:var(--red)">3.26 ⚡</td><td style="text-align:center;color:var(--green)">~60%</td><td style="text-align:center;color:var(--red)">&gt;60%</td><td style="text-align:center">46–50%</td><td style="text-align:center;color:var(--gold)">+0.15</td><td style="text-align:center;color:var(--red)">较差</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:5px 8px;color:var(--purple)">🌸 女亚杯</td><td style="text-align:center">对阵依赖</td><td style="text-align:center">对阵依赖</td><td style="text-align:center">强弱=高</td><td style="text-align:center">主场+10%</td><td style="text-align:center;color:var(--gold)">+0.20</td><td style="text-align:center;color:var(--red)">差</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)"><td style="padding:5px 8px;color:var(--gold)">🏆 亚冠精英</td><td style="text-align:center;color:var(--gold)">3.04</td><td style="text-align:center;color:var(--green)">55–60%</td><td style="text-align:center">~55%</td><td style="text-align:center">44–48%</td><td style="text-align:center;color:var(--gold)">+0.12</td><td style="text-align:center;color:var(--gold)">中等</td></tr>
+        <tr><td style="padding:5px 8px;color:var(--cyan)">🏅 亚冠二级</td><td style="text-align:center">对阵依赖</td><td style="text-align:center">对阵依赖</td><td style="text-align:center">强弱=高</td><td style="text-align:center">主场强</td><td style="text-align:center;color:var(--gold)">+0.15</td><td style="text-align:center;color:var(--red)">最差</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;font-size:11px;color:var(--sub2);line-height:1.8">
+      <b style="color:var(--gold)">如何使用：</b>用户提供早场赔率截图 → 引擎调用对应行参数 → 计算庄家隐含概率 → 与基准统计对比识别异常定价。<b style="color:var(--red)">SR无覆盖，不提供EV推荐。</b>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
 <script>
+// ══ 标签切换 ══
+function sw(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({top:document.querySelector('.tabnav').offsetTop-10,behavior:'smooth'});
+}
+function td(btn){
+  const b=btn.nextElementSibling;
+  const i=btn.querySelector('.dicon');
+  b.classList.toggle('open');
+  i.style.transform=b.classList.contains('open')?'rotate(90deg)':'';
+}
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.querySelectorAll('.prob-bar').forEach(b=>{const w=b.style.width;b.style.width='0';setTimeout(()=>b.style.width=w,100);});
+  },200);
+});
+
+// ══ 比分精算引擎 ══
 const PROXY='https://proxy.947552250.workers.dev';
-const W=['1:0','2:0','2:1','3:0','3:1','3:2','4:0','4:1','5:0'];
-const D=['0:0','1:1','2:2','3:3'];
-const L=['0:1','0:2','1:2','0:3','1:3','2:3','0:4','1:4','0:5'];
-const ALL=[...W,...D,...L];
-const BFM={h1:'1:0',h2:'2:0',h3:'2:1',h4:'3:0',h5:'3:1',h6:'3:2',h7:'4:0',h8:'4:1',h9:'4:2',h10:'5:0',d1:'0:0',d2:'1:1',d3:'2:2',d4:'3:3',a1:'0:1',a2:'0:2',a3:'1:2',a4:'0:3',a5:'1:3',a6:'2:3',a7:'0:4',a8:'1:4',a9:'2:4',a10:'0:5'};
-const LAV={'意甲':2.65,'西甲':2.70,'德甲':3.05,'法甲':2.55,'英超':2.80,'欧冠':2.90,'MLS':2.95,'亚冠':2.60,'英冠':2.75};
-const ag=l=>{for(const k of Object.keys(LAV))if((l||'').includes(k))return LAV[k];return 2.70};
+const CRS={crs10Odds:'1:0',crs20Odds:'2:0',crs21Odds:'2:1',crs30Odds:'3:0',crs31Odds:'3:1',crs32Odds:'3:2',crs40Odds:'4:0',crs41Odds:'4:1',crs42Odds:'4:2',crs50Odds:'5:0',crs51Odds:'5:1',crs52Odds:'5:2',crs00Odds:'0:0',crs11Odds:'1:1',crs22Odds:'2:2',crs33Odds:'3:3',crs01Odds:'0:1',crs02Odds:'0:2',crs12Odds:'1:2',crs03Odds:'0:3',crs13Odds:'1:3',crs23Odds:'2:3',crs04Odds:'0:4',crs14Odds:'1:4',crs24Odds:'2:4',crs05Odds:'0:5',crs15Odds:'1:5',crs25Odds:'2:5'};
+const SW=['1:0','2:0','2:1','3:0','3:1','3:2','4:0','4:1','5:0'];
+const SD=['0:0','1:1','2:2','3:3'];
+const SL=['0:1','0:2','1:2','0:3','1:3','2:3','0:4','1:4','0:5'];
+const SALL=[...SW,...SD,...SL];
+const LAV={'女亚洲':1.8,'亚冠':2.60,'欧冠':2.90,'英冠':2.75,'意甲':2.65,'西甲':2.70,'德甲':3.05,'法甲':2.55,'英超':2.80,'MLS':2.95};
+const getAvg=l=>{for(const k of Object.keys(LAV))if((l||'').includes(k))return LAV[k];return 2.70};
+
+// 泊松PMF
 const ppf=(λ,k)=>{if(k<0||λ<=0)return 0;let lp=-λ+k*Math.log(λ);for(let i=1;i<=k;i++)lp-=Math.log(i);return Math.exp(lp)};
-const cp=(lH,lA)=>{let H=0,D=0,A=0;for(let i=0;i<=8;i++)for(let j=0;j<=8;j++){const p=ppf(lH,i)*ppf(lA,j);if(i>j)H+=p;else if(i===j)D+=p;else A+=p}const t=H+D+A;return[H/t,D/t,A/t]};
-const fl=(pH,pD,pA,avg)=>{let lH=avg*(0.5+(pH-pA)*0.42),lA=avg-lH;lH=Math.max(0.18,Math.min(3.9,lH));lA=Math.max(0.18,Math.min(3.9,lA));for(let i=0;i<180;i++){const[cH,,cA]=cp(lH,lA);lH=Math.max(0.15,lH+(pH-cH)*0.055);lA=Math.max(0.15,lA+(pA-cA)*0.055)}return[+lH.toFixed(3),+lA.toFixed(3)]};
-const bm=(lH,lA)=>{const m=[];let tot=0;for(let i=0;i<=5;i++){m[i]=[];for(let j=0;j<=5;j++){m[i][j]=ppf(lH,i)*ppf(lA,j);tot+=m[i][j]}}for(let i=0;i<=5;i++)for(let j=0;j<=5;j++)m[i][j]/=tot;return m};
-const ss=(msg,st)=>{document.getElementById('smsg').textContent=msg;const d=document.getElementById('sdot');const c={idle:'#4d6a8a',load:'#ffc837',ok:'#00e5a0',err:'#ff3d5a'};d.style.background=c[st];d.style.boxShadow=st!=='idle'?`0 0 6px ${c[st]}`:'none'};
-const ec=ev=>ev===null?'ev-n':ev>0?'ev-g':ev>-10?'ev-m':'ev-b';
-const evl=ev=>ev===null?'无赔率':ev>0?`+${ev.toFixed(1)}%`:`${ev.toFixed(1)}%`;
-const to=sc=>{const[h,a]=sc.split(':').map(Number);return h>a?'w':h===a?'d':'l'};
-const tc=t=>t==='w'?'var(--green)':t==='d'?'var(--gold)':'var(--red)';
-const tn=t=>t==='w'?'主胜':t==='d'?'平局':'客胜';
-let AM=[];
-async function fetchData(){
-  document.getElementById('btnf').disabled=true;
-  document.getElementById('afail').classList.remove('show');
-  ss('正在拉取…','load');
+
+// Dixon-Coles修正函数 ρ修正低比分格
+const dcRho=-0.13; // 标准ρ修正值
+const dcTau=(i,j,lH,lA,r)=>{
+  if(i===0&&j===0)return 1-lH*lA*r;
+  if(i===0&&j===1)return 1+lH*r;
+  if(i===1&&j===0)return 1+lA*r;
+  if(i===1&&j===1)return 1-r;
+  return 1;
+};
+
+// 构建Dixon-Coles修正比分矩阵
+const buildMatrix=(lH,lA)=>{
+  const m=[];let tot=0;
+  for(let i=0;i<=5;i++){
+    m[i]=[];
+    for(let j=0;j<=5;j++){
+      const raw=ppf(lH,i)*ppf(lA,j);
+      const tau=(i<=1&&j<=1)?dcTau(i,j,lH,lA,dcRho):1;
+      m[i][j]=raw*tau;
+      tot+=m[i][j];
+    }
+  }
+  // 归一化
+  for(let i=0;i<=5;i++)for(let j=0;j<=5;j++)m[i][j]/=tot;
+  return m;
+};
+
+// 计算主平客概率
+const calcHDA=(lH,lA)=>{
+  let H=0,D=0,A=0;
+  for(let i=0;i<=8;i++)for(let j=0;j<=8;j++){
+    const p=ppf(lH,i)*ppf(lA,j);
+    if(i>j)H+=p;else if(i===j)D+=p;else A+=p;
+  }
+  const t=H+D+A;return[H/t,D/t,A/t];
+};
+
+// 从真实胜平负赔率去水份→概率→拟合λ
+const oddsToProb=(h,d,a)=>{const r=[1/h,1/d,1/a],t=r.reduce((s,v)=>s+v,0);return r.map(v=>v/t)};
+const fitLambda=(pH,pD,pA,avg)=>{
+  let lH=avg*(0.5+(pH-pA)*0.42),lA=avg-lH;
+  lH=Math.max(0.18,Math.min(3.9,lH));lA=Math.max(0.18,Math.min(3.9,lA));
+  for(let i=0;i<200;i++){
+    const[cH,,cA]=calcHDA(lH,lA);
+    lH=Math.max(0.15,lH+(pH-cH)*0.055);
+    lA=Math.max(0.15,lA+(pA-cA)*0.055);
+  }
+  return[+lH.toFixed(3),+lA.toFixed(3)];
+};
+
+const toType=sc=>{const[h,a]=sc.split(':').map(Number);return h>a?'w':h===a?'d':'l'};
+const typeColor=t=>t==='w'?'var(--green)':t==='d'?'var(--gold)':'var(--red)';
+const typeName=t=>t==='w'?'主胜':t==='d'?'平局':'客胜';
+const evClass=ev=>ev===null?'ev-n':ev>0?'ev-g':ev>-10?'ev-m':'ev-b';
+const evLabel=ev=>ev===null?'无赔率':ev>0?`+${ev.toFixed(1)}%`:`${ev.toFixed(1)}%`;
+
+let scoreMatches=[];
+
+function setSS(msg,color){
+  const el=document.getElementById('score-status');
+  if(el){el.textContent=msg;el.style.color=color||'var(--sub)';}
+}
+
+async function scoreFetch(){
+  const btn=document.getElementById('score-btn');
+  if(btn)btn.disabled=true;
+  setSS('正在拉取…','var(--gold)');
   try{
     const r=await fetch(PROXY);
-    if(!r.ok)throw new Error();
+    if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    const raw=d?.data||[];
-    if(!raw.length)throw new Error();
-    const ms=raw.map(m=>{
-      const bf=m.wf?.bf||m.bf||{};const sc={};
-      Object.entries(BFM).forEach(([k,s])=>{const v=parseFloat(bf[k]?.z||bf[k]||0);if(v>0)sc[s]=v});
-      const sp=m.wf?.spf||m.spf||{};
-      return{id:m.matchNum||'',league:m.leagueName||'',home:m.homeName||'',away:m.guestName||'',time:(m.time||'').slice(5,16),spf:{h:parseFloat(sp.h?.z||sp.h||0),d:parseFloat(sp.d?.z||sp.d||0),a:parseFloat(sp.a?.z||sp.a||0)},scores:sc,cnt:Object.keys(sc).length};
-    }).filter(m=>m.home&&m.away);
-    if(!ms.length)throw new Error();
-    ss(`已加载 ${ms.length} 场`,'ok');
-    renderList(ms);
+    const rawCrs=d?.crs?.data||[];
+    const rawSpf=d?.spf?.data||[];
+    if(!rawCrs.length)throw new Error('无数据');
+    // 建立matchId→SPF映射
+    const spfMap={};
+    rawSpf.forEach(m=>{
+      const h=parseFloat(m.hadH||0),dd=parseFloat(m.hadD||0),a=parseFloat(m.hadA||0);
+      if(h>0&&dd>0&&a>0)spfMap[m.matchId]={h,d:dd,a};
+    });
+    const ms=rawCrs.map(m=>{
+      const sc={};
+      Object.entries(CRS).forEach(([k,s])=>{const v=parseFloat(m[k]||0);if(v>0)sc[s]=v});
+      return{id:m.matchNum||'',league:m.leagueName||'',home:m.homeName||'',away:m.guestName||'',time:(m.time||'').slice(0,5),scores:sc,spf:spfMap[m.matchId]||null,cnt:Object.keys(sc).length};
+    }).filter(m=>m.home&&m.away&&m.cnt>0);
+    if(!ms.length)throw new Error('无有效场次');
+    setSS(`已加载 ${ms.length} 场`,'var(--green)');
+    scoreRenderList(ms);
   }catch(e){
-    ss('拉取失败，已切换示例','err');
-    document.getElementById('afail').classList.add('show');
-    loadDemo();
+    setSS('拉取失败: '+e.message,'var(--red)');
   }
-  document.getElementById('btnf').disabled=false;
+  if(btn)btn.disabled=false;
 }
-function loadDemo(){
-  ss('示例数据','ok');
-  renderList([
-    {id:'006',league:'西甲',home:'西班牙人',away:'奥维耶多',time:'03-09 04:00',spf:{h:1.63,d:3.35,a:4.60},scores:{'1:0':3.90,'2:0':6.50,'2:1':5.80,'3:0':12,'3:1':10,'3:2':18,'4:0':28,'4:1':25,'5:0':60,'0:0':7.50,'1:1':5.20,'2:2':14,'3:3':55,'0:1':11,'0:2':22,'1:2':16,'0:3':50,'1:3':42,'2:3':55},cnt:19},
-    {id:'004',league:'意甲',home:'拉齐奥',away:'萨索洛',time:'03-09 03:45',spf:{h:2.09,d:2.90,a:3.27},scores:{'1:0':4.50,'2:0':7.00,'2:1':5.50,'3:0':13,'3:1':11,'3:2':19,'4:0':30,'4:1':27,'5:0':65,'0:0':7.00,'1:1':4.80,'2:2':13,'3:3':52,'0:1':9.50,'0:2':18,'1:2':14,'0:3':40,'1:3':36,'2:3':48},cnt:19}
+
+function scoreDemo(){
+  setSS('示例数据','var(--cyan)');
+  scoreRenderList([
+    {id:'006',league:'西甲',home:'西班牙人',away:'奥维耶多',time:'04:00',spf:{h:1.63,d:3.35,a:4.60},scores:{'1:0':3.90,'2:0':6.50,'2:1':5.80,'3:0':12,'3:1':10,'3:2':18,'4:0':28,'4:1':25,'5:0':60,'0:0':7.50,'1:1':5.20,'2:2':14,'3:3':55,'0:1':11,'0:2':22,'1:2':16,'0:3':50,'1:3':42,'2:3':55},cnt:19},
+    {id:'004',league:'意甲',home:'拉齐奥',away:'萨索洛',time:'03:45',spf:{h:2.09,d:2.90,a:3.27},scores:{'1:0':4.50,'2:0':7.00,'2:1':5.50,'3:0':13,'3:1':11,'3:2':19,'4:0':30,'4:1':27,'5:0':65,'0:0':7.00,'1:1':4.80,'2:2':13,'3:3':52,'0:1':9.50,'0:2':18,'1:2':14,'0:3':40,'1:3':36,'2:3':48},cnt:19}
   ]);
 }
-function renderList(ms){
-  AM=ms;
-  document.getElementById('mlist').innerHTML=ms.map((m,i)=>`
-    <div class="mitem" id="mi${i}" onclick="sel(${i})">
-      <span class="tag">${m.league||'竞彩'}</span>
-      <span class="mname">${m.home} <span style="color:var(--sub)">vs</span> ${m.away}</span>
-      <span class="mtime">${m.time}</span>
-      <span style="font-size:13px;font-weight:700"><span style="color:var(--green)">${m.spf.h||'—'}</span>/<span style="color:var(--gold)">${m.spf.d||'—'}</span>/<span style="color:var(--red)">${m.spf.a||'—'}</span></span>
-      <span class="mcnt" style="color:${m.cnt>0?'var(--green)':'var(--sub)'}">${m.cnt>0?'✓'+m.cnt+'种':'无比分'}</span>
+
+function scoreRenderList(ms){
+  scoreMatches=ms;
+  const el=document.getElementById('score-mlist');
+  el.innerHTML=ms.map((m,i)=>`
+    <div onclick="scoreSelect(${i})" id="smi${i}" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap;transition:all .2s">
+      <span style="font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.2);font-family:var(--mono)">${m.league}</span>
+      <span style="font-size:14px;font-weight:500;flex:1">${m.home} <span style="color:var(--sub)">vs</span> ${m.away}</span>
+      <span style="font-size:10px;color:var(--sub);font-family:var(--mono)">${m.time}</span>
+      <span style="font-size:11px">${m.spf?`<span style="color:var(--green)">${m.spf.h}</span>/<span style="color:var(--gold)">${m.spf.d}</span>/<span style="color:var(--red)">${m.spf.a}</span>`:'<span style="color:var(--red)">无胜平负</span>'}</span>
+      <span style="font-size:9px;font-family:var(--mono);color:${m.cnt>0?'var(--green)':'var(--sub)'}">✓${m.cnt}种比分</span>
     </div>`).join('');
-  document.getElementById('mlist').classList.add('show');
-  document.getElementById('result').classList.remove('show');
+  el.style.display='flex';
+  el.style.flexDirection='column';
+  document.getElementById('score-result').innerHTML='';
 }
-function sel(idx){
-  document.querySelectorAll('.mitem').forEach((e,i)=>e.classList.toggle('sel',i===idx));
-  const m=AM[idx];
-  const{h,d,a}=m.spf;
-  let pH,pD,pA;
-  if(h>0&&d>0&&a>0){const r=[1/h,1/d,1/a],t=r.reduce((s,v)=>s+v,0);[pH,pD,pA]=r.map(v=>v/t)}
-  else{pH=0.4;pD=0.3;pA=0.3}
-  const avg=ag(m.league);const[lH,lA]=fl(pH,pD,pA,avg);const mat=bm(lH,lA);const[vH,vD,vA]=cp(lH,lA);
-  let maxP=0,maxSc='1:0';const em={};
-  ALL.forEach(sc=>{const[hg,ag2]=sc.split(':').map(Number);const p=(hg<=5&&ag2<=5)?mat[hg][ag2]:0;if(p>maxP){maxP=p;maxSc=sc}const od=m.scores[sc]||0;em[sc]={p,od,ev:od>0?(p*od-1)*100:null}});
-  const rk=ALL.filter(sc=>em[sc].ev!==null).sort((a,b)=>em[b].ev-em[a].ev);
-  let lP=0;ALL.forEach(sc=>{const[hg,ag2]=sc.split(':').map(Number);if(hg<=5&&ag2<=5)lP+=mat[hg][ag2]});
-  const oP=(1-lP)*100;
-  document.getElementById('result').innerHTML=`
-    <div class="mh"><span class="mh-name">${m.home} <span style="color:var(--sub);font-size:15px">vs</span> ${m.away}</span><span class="mh-badge">${m.league}</span><span style="margin-left:auto;font-size:10px;color:var(--sub);font-family:monospace">λ主=${lH}·λ客=${lA}</span></div>
-    <div class="lstrip">
-      ${[['主胜','var(--green)',vH],['平局','var(--gold)',vD],['客胜','var(--red)',vA]].map(([l,c,v])=>`<div class="lbox"><div class="ll">${l}</div><div class="lv" style="color:${c}">${(v*100).toFixed(1)}%</div></div>`).join('')}
-      <div class="lbox"><div class="ll">最高概率</div><div class="lv" style="color:var(--gold);font-size:17px">${maxSc}</div><div style="font-size:9px;color:var(--sub);font-family:monospace">${(maxP*100).toFixed(2)}%</div></div>
-      <div class="lbox" style="border-color:rgba(255,61,90,.2)"><div class="ll">其他比分⚠</div><div class="lv" style="color:var(--red)">${oP.toFixed(1)}%</div></div>
+
+function scoreSelect(idx){
+  document.querySelectorAll('[id^="smi"]').forEach((e,i)=>{
+    e.style.borderColor=i===idx?'rgba(0,229,160,.5)':'var(--border)';
+    e.style.background=i===idx?'rgba(0,229,160,.04)':'var(--card)';
+  });
+  const m=scoreMatches[idx];
+
+  // 检查真实赔率
+  if(!m.spf||!m.spf.h){
+    document.getElementById('score-result').innerHTML=`
+      <div style="background:rgba(255,61,90,.04);border:1px solid rgba(255,61,90,.2);border-radius:8px;padding:14px;font-size:12px;line-height:1.8">
+        ⛔ <b style="color:var(--red)">${m.home} vs ${m.away}</b> — 无真实胜平负赔率，遵守红线准则，不做EV计算。
+      </div>`;
+    return;
+  }
+
+  // 计算
+  const[pH,pD,pA]=oddsToProb(m.spf.h,m.spf.d,m.spf.a);
+  const avg=getAvg(m.league);
+  const[lH,lA]=fitLambda(pH,pD,pA,avg);
+  const mat=buildMatrix(lH,lA);
+  const[vH,vD,vA]=calcHDA(lH,lA);
+
+  // 找最高概率比分
+  let maxP=0,maxSc='1:0';
+  const em={};
+  SALL.forEach(sc=>{
+    const[hg,ag2]=sc.split(':').map(Number);
+    const p=(hg<=5&&ag2<=5)?mat[hg][ag2]:0;
+    if(p>maxP){maxP=p;maxSc=sc}
+    const od=m.scores[sc]||0;
+    em[sc]={p,od,ev:od>0?(p*od-1)*100:null};
+  });
+
+  // EV排名
+  const ranked=SALL.filter(sc=>em[sc].ev!==null).sort((a,b)=>em[b].ev-em[a].ev);
+
+  // 其他比分概率
+  let covP=0;SALL.forEach(sc=>{const[hg,ag2]=sc.split(':').map(Number);if(hg<=5&&ag2<=5)covP+=mat[hg][ag2]});
+  const otherP=(1-covP)*100;
+
+  document.getElementById('score-result').innerHTML=`
+    <!-- 标题 -->
+    <div style="background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(56,182,255,.05));border:1px solid rgba(167,139,250,.18);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-size:20px;font-weight:700">${m.home} <span style="color:var(--sub);font-size:15px">vs</span> ${m.away}</span>
+      <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)">${m.league}</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--sub);font-family:var(--mono)">λ主=${lH} · λ客=${lA} · DC修正ρ=${dcRho}</span>
     </div>
-    ${rk.length?`<div class="sec"><div class="sec-t">★ EV TOP5</div><div class="sec-line"></div></div><div class="top-card"><div class="top-title">TOP5（有竞彩官方赔率）</div>${rk.slice(0,5).map((sc,i)=>{const{p,od,ev}=em[sc];const t=to(sc);const g=['var(--gold)','#c0c0c0','#cd7f32','var(--sub)','var(--sub)'][i];return`<div class="trow"><span class="tr-rk" style="color:${g}">${i+1}</span><span class="tr-sc" style="color:${tc(t)}">${sc}</span><span class="tr-info">P:${(p*100).toFixed(2)}%·@${od}·${tn(t)}</span><span class="tr-ev ${ec(ev)}">${evl(ev)}</span></div>`}).join('')}</div>`:''}
-    <div class="sec"><div class="sec-t">EV 全览</div><div class="sec-line"></div></div>
-    ${[['▶ 主胜',W,'w'],['▶ 平局',D,'d'],['▶ 客胜',L,'l']].map(([tt,scs,tp])=>`<div class="gtitle">${tt}</div><div class="bgrid">${scs.map(sc=>{const{p,od,ev}=em[sc];return`<div class="bcell${ev!==null&&ev>-5?' best':ev!==null&&ev>-12?' good':''}"><div class="bsc ${tp}">${sc}</div><div class="bp">P:${(p*100).toFixed(2)}%</div>${od>0?`<div class="bod">@${od}</div><div class="bev ${ec(ev)}">${evl(ev)}</div>`:'<div class="bev ev-n">无赔率</div>'}</div>`}).join('')}</div>`).join('')}
-    <div class="sec"><div class="sec-t">概率矩阵</div><div class="sec-line"></div></div>
-    <div class="mwrap"><div class="mtitle">POISSON 6×6 · 行=主队 · 列=客队</div><table class="mtx"><tr><th>${m.home}↓/${m.away}→</th>${[0,1,2,3,4,5].map(j=>`<th>客${j}</th>`).join('')}</tr>${[0,1,2,3,4,5].map(i=>`<tr><th style="background:var(--bg3);padding:5px 6px;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:monospace">主${i}</th>${[0,1,2,3,4,5].map(j=>{const p=mat[i][j];const al=Math.min(0.38,p/maxP*0.38).toFixed(2);const bg=i>j?`rgba(0,229,160,${al})`:i===j?`rgba(255,200,55,${al})`:`rgba(255,61,90,${al})`;return`<td style="background:${bg};outline:${p===maxP?'2px solid var(--gold)':'none'}"><span class="cv">${(p*100).toFixed(1)}%</span><span class="cs">${i}:${j}</span></td>`}).join('')}</tr>`).join('')}</table></div>
-    <div class="note">⚠ <b style="color:var(--gold)">其他比分=${oP.toFixed(1)}%</b> 不在竞彩22种内。单个比分命中率低，建议小额辅助。</div>`;
-  document.getElementById('result').classList.add('show');
-  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+
+    <!-- 赔率来源说明 -->
+    <div class="tbl-note" style="margin-bottom:8px">
+      <b style="color:var(--cyan)">真实竞彩赔率</b>：胜 <b style="color:var(--green)">${m.spf.h}</b> / 平 <b style="color:var(--gold)">${m.spf.d}</b> / 负 <b style="color:var(--red)">${m.spf.a}</b>
+      → 去水份概率：主胜 ${(pH*100).toFixed(1)}% / 平 ${(pD*100).toFixed(1)}% / 客胜 ${(pA*100).toFixed(1)}%
+    </div>
+
+    <!-- 概率总览 -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      ${[['主胜','var(--green)',vH],['平局','var(--gold)',vD],['客胜','var(--red)',vA]].map(([l,c,v])=>`
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;text-align:center;flex:1;min-width:70px">
+          <div style="font-size:9px;color:var(--sub);font-family:var(--mono);margin-bottom:2px">${l}</div>
+          <div style="font-size:20px;font-weight:700;color:${c}">${(v*100).toFixed(1)}%</div>
+        </div>`).join('')}
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;text-align:center;flex:1;min-width:80px">
+        <div style="font-size:9px;color:var(--sub);font-family:var(--mono);margin-bottom:2px">最高概率比分</div>
+        <div style="font-size:20px;font-weight:700;color:var(--gold)">${maxSc}</div>
+        <div style="font-size:9px;color:var(--sub);font-family:var(--mono)">${(maxP*100).toFixed(2)}%</div>
+      </div>
+      <div style="background:var(--card);border:1px solid rgba(255,61,90,.2);border-radius:7px;padding:8px 10px;text-align:center;flex:1;min-width:70px">
+        <div style="font-size:9px;color:var(--sub);font-family:var(--mono);margin-bottom:2px">其他比分⚠</div>
+        <div style="font-size:20px;font-weight:700;color:var(--red)">${otherP.toFixed(1)}%</div>
+      </div>
+    </div>
+
+    <!-- TOP5 EV -->
+    ${ranked.length?`
+    <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
+      <span style="font-size:13px;font-weight:700;color:#fff">★ EV TOP5</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--or);letter-spacing:1.5px;margin-bottom:10px;font-family:var(--mono)">TOP5 · 竞彩官方比分赔率 · Dixon-Coles修正概率</div>
+      ${ranked.slice(0,5).map((sc,i)=>{const{p,od,ev}=em[sc];const t=toType(sc);const g=['var(--gold)','#c0c0c0','#cd7f32','var(--sub)','var(--sub)'][i];return`
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:4px">
+          <span style="font-size:18px;font-weight:700;color:${g};min-width:18px">${i+1}</span>
+          <span style="font-size:18px;font-weight:700;color:${typeColor(t)};min-width:40px">${sc}</span>
+          <span style="flex:1;font-size:11px;color:var(--sub2)">P:${(p*100).toFixed(2)}% · @${od} · ${typeName(t)}</span>
+          <span style="font-size:12px;font-weight:700;font-family:var(--mono)" class="${evClass(ev)}">${evLabel(ev)}</span>
+        </div>`}).join('')}
+    </div>`:''}
+
+    <!-- EV全览 -->
+    <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
+      <span style="font-size:13px;font-weight:700;color:#fff">EV 全览</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    ${[['▶ 主胜',SW,'w'],['▶ 平局',SD,'d'],['▶ 客胜',SL,'l']].map(([tt,scs,tp])=>`
+      <div style="font-size:10px;color:var(--sub2);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);font-family:var(--mono)">${tt}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:5px;margin-bottom:12px">
+        ${scs.map(sc=>{const{p,od,ev}=em[sc];const best=ev!==null&&ev>-5,good=ev!==null&&ev>-12;return`
+          <div style="background:var(--card);border:1px solid ${best?'rgba(0,229,160,.4)':good?'rgba(255,200,55,.3)':'var(--border)'};border-radius:7px;padding:7px 8px;${best?'background:rgba(0,229,160,.05)':good?'background:rgba(255,200,55,.03)':''}">
+            <div style="font-size:15px;font-weight:700;color:${tp==='w'?'var(--green)':tp==='d'?'var(--gold)':'var(--red)'};margin-bottom:3px">${sc}</div>
+            <div style="font-size:9px;color:var(--sub);font-family:var(--mono)">P:${(p*100).toFixed(2)}%</div>
+            ${od>0?`<div style="font-size:13px;font-weight:700;color:var(--cyan)">@${od}</div><div style="font-size:10px;font-weight:700;font-family:var(--mono)" class="${evClass(ev)}">${evLabel(ev)}</div>`:'<div style="font-size:10px;color:var(--sub)">无赔率</div>'}
+          </div>`}).join('')}
+      </div>`).join('')}
+
+    <!-- 泊松矩阵 -->
+    <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
+      <span style="font-size:13px;font-weight:700;color:#fff">Dixon-Coles 概率矩阵</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--purple);letter-spacing:1.2px;margin-bottom:8px;font-family:var(--mono)">6×6矩阵 · 行=主队进球 · 列=客队进球 · DC修正低比分</div>
+      <table style="border-collapse:collapse;min-width:360px;font-size:11px">
+        <tr><th style="background:var(--bg3);padding:5px 6px;text-align:center;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:var(--mono)">${m.home}↓/${m.away}→</th>
+          ${[0,1,2,3,4,5].map(j=>`<th style="background:var(--bg3);padding:5px 6px;text-align:center;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:var(--mono)">客${j}</th>`).join('')}
+        </tr>
+        ${[0,1,2,3,4,5].map(i=>`
+          <tr>
+            <th style="background:var(--bg3);padding:5px 6px;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:var(--mono)">主${i}</th>
+            ${[0,1,2,3,4,5].map(j=>{
+              const p=mat[i][j];
+              const al=Math.min(0.4,p/maxP*0.4).toFixed(2);
+              const bg=i>j?`rgba(0,229,160,${al})`:i===j?`rgba(255,200,55,${al})`:`rgba(255,61,90,${al})`;
+              return`<td style="padding:4px 5px;text-align:center;border:1px solid rgba(21,32,48,.5);background:${bg};outline:${p===maxP?'2px solid var(--gold)':'none'}">
+                <span style="display:block;font-size:11px;font-weight:600">${(p*100).toFixed(1)}%</span>
+                <span style="display:block;font-size:8px;color:var(--sub);font-family:var(--mono)">${i}:${j}</span>
+              </td>`;
+            }).join('')}
+          </tr>`).join('')}
+      </table>
+    </div>
+    <div class="tbl-note">⚠ <b style="color:var(--gold)">其他比分概率=${otherP.toFixed(1)}%</b> 不在竞彩22种范围内，实际命中率低，建议小额辅助配合。</div>
+  `;
 }
 </script>
+
 </body>
 </html>
