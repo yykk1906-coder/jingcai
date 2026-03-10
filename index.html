@@ -1716,7 +1716,9 @@ function runMonteCarlo(){
   // 收集用户选择
   const selected=[];
   mcPool.forEach((m,i)=>{
-    const skip=document.getElementById(`mc-skip-${i}`)?.checked;
+    // 修复：两个mc-picks容器里都有同名checkbox，取任意一个checked=true就跳过
+    const skipEls=document.querySelectorAll(`#mc-skip-${i}`);
+    const skip=Array.from(skipEls).some(el=>el.checked);
     if(skip)return;
     const radios=document.querySelectorAll(`input[name="mc-pick-${i}"]`);
     let chosen=null;
@@ -1801,9 +1803,9 @@ function runMonteCarlo(){
       const roi=+((combo2wins[ci]/N*combinedOdds-1)*100).toFixed(1);
       const evCol=ev>0?'var(--green)':ev>-10?'var(--gold)':'var(--red)';
       const roiCol=roi>0?'var(--green)':roi>-10?'var(--gold)':'var(--red)';
-      return{combinedOdds,theorProb,simProb,ev,roi,a,b,ci,evCol,roiCol,
+      return{combinedOdds,theorProb,simProb,ev,roi,a,b,c,a,b,ci,evCol,roiCol,
         row:`<tr style="border-left:3px solid ${ev>0?'var(--green)':ev>-10?'rgba(255,200,55,.5)':'rgba(255,61,90,.3)'}">
-          <td class="tl" style="font-size:10px;font-family:var(--mono)">${sa.label.split(' ')[0]} ${sa.dir} × ${sb.label.split(' ')[0]} ${sb.dir}</td>
+          <td class="tl" style="font-size:10px;font-family:var(--mono);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label} [${sa.dir}] × ${sb.label} [${sb.dir}]</td>
           <td style="font-family:var(--num);font-size:15px;font-weight:700;color:var(--or)">${combinedOdds}x</td>
           <td style="font-family:var(--mono)">${theorProb}%</td>
           <td style="font-family:var(--mono);color:var(--cyan)">${simProb}%</td>
@@ -1823,7 +1825,7 @@ function runMonteCarlo(){
       const roiCol=roi>0?'var(--green)':roi>-15?'var(--gold)':'var(--red)';
       return{combinedOdds,theorProb,simProb,ev,roi,
         row:`<tr style="border-left:3px solid ${ev>0?'var(--green)':ev>-15?'rgba(255,200,55,.5)':'rgba(255,61,90,.3)'}">
-          <td class="tl" style="font-size:10px;font-family:var(--mono)">${sa.dir.slice(0,1)} × ${sb.dir.slice(0,1)} × ${sc2.dir.slice(0,1)}</td>
+          <td class="tl" style="font-size:10px;font-family:var(--mono);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label} [${sa.dir}] × ${sb.label} [${sb.dir}] × ${sc2.label} [${sc2.dir}]</td>
           <td style="font-family:var(--num);font-size:15px;font-weight:700;color:var(--purple)">${combinedOdds}x</td>
           <td style="font-family:var(--mono)">${theorProb}%</td>
           <td style="font-family:var(--mono);color:var(--cyan)">${simProb}%</td>
@@ -1906,7 +1908,7 @@ function runMonteCarlo(){
         <div style="font-size:11px;font-family:var(--mono);line-height:2;color:var(--text)">
           <b style="color:var(--green)">最优二串一：</b>${selected[best2.a].label} <span style="color:${selected[best2.a].dir==='主胜'?'var(--green)':selected[best2.a].dir==='平局'?'var(--gold)':'var(--red)'}">[${selected[best2.a].dir}]</span> × ${selected[best2.b].label} <span style="color:${selected[best2.b].dir==='主胜'?'var(--green)':selected[best2.b].dir==='平局'?'var(--gold)':'var(--red)'}">[${selected[best2.b].dir}]</span>
           · 赔率 <b style="color:var(--or)">${best2.combinedOdds}x</b> · 模拟命中率 <b style="color:var(--cyan)">${best2.simProb}%</b> · 理论EV <span class="${evClass(best2.ev)}">${best2.ev>0?'+':''}${best2.ev}%</span><br>
-          ${best3?`<b style="color:var(--purple)">最优三串一：</b>赔率 <b style="color:var(--purple)">${best3.combinedOdds}x</b> · 模拟命中率 <b style="color:var(--cyan)">${best3.simProb}%</b> · 理论EV <span class="${evClass(best3.ev)}">${best3.ev>0?'+':''}${best3.ev}%</span><br>`:''}
+          ${best3?`<b style="color:var(--purple)">最优三串一：</b>${selected[best3.a].label}[${selected[best3.a].dir}] × ${selected[best3.b].label}[${selected[best3.b].dir}] × ${selected[best3.c].label}[${selected[best3.c].dir}] · 赔率 <b style="color:var(--purple)">${best3.combinedOdds}x</b> · 模拟命中率 <b style="color:var(--cyan)">${best3.simProb}%</b> · 理论EV <span class="${evClass(best3.ev)}">${best3.ev>0?'+':''}${best3.ev}%</span><br>`:''}
           <span style="color:var(--sub);font-size:10px">⚠ 蒙特卡洛模拟基于泊松概率，结果每次略有差异（±0.5%）。EV为负不代表不能中，代表长期期望为负。</span>
         </div>
       </div>`;
