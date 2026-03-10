@@ -1751,185 +1751,142 @@ function runMonteCarlo(){
 }
 
 function runMonteCarloWithData(selected){
-  if(selected.length<2){
+  if(!selected||selected.length<2){
     document.getElementById('mc-result').innerHTML=`<div style="color:var(--red);font-size:12px;padding:8px">⚠ 请至少选择2场并指定投注方向</div>`;
     return;
   }
-  const N=10000;
-  const result=document.getElementById('mc-result');
-  result.innerHTML=`<div style="color:var(--gold);font-size:12px;padding:8px;font-family:var(--mono)">⏳ 正在模拟${N.toLocaleString()}次…</div>`;
+  const N=5000; // 降为5000次，手机更快
+  const resultEl=document.getElementById('mc-result');
+  resultEl.innerHTML=`<div style="color:var(--gold);font-size:12px;padding:8px;font-family:var(--mono)">⏳ 正在模拟${N.toLocaleString()}次…</div>`;
 
-  // 用setTimeout让UI先更新
-  setTimeout(()=>{
-    // 生成所有二串一组合
-    const combos2=[];
-    for(let a=0;a<selected.length;a++)
-      for(let b=a+1;b<selected.length;b++)
-        combos2.push([a,b]);
+  // 用requestAnimationFrame确保UI先更新，再跑模拟
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      try{
+        const combos2=[];
+        for(let a=0;a<selected.length;a++)
+          for(let b=a+1;b<selected.length;b++)
+            combos2.push([a,b]);
+        const combos3=[];
+        if(selected.length>=3)
+          for(let a=0;a<selected.length;a++)
+            for(let b=a+1;b<selected.length;b++)
+              for(let c2=b+1;c2<selected.length;c2++)
+                combos3.push([a,b,c2]);
 
-    // 生成所有三串一组合（如果≥3场）
-    const combos3=[];
-    if(selected.length>=3)
-      for(let a=0;a<selected.length;a++)
-        for(let b=a+1;b<selected.length;b++)
-          for(let c=b+1;c<selected.length;c++)
-            combos3.push([a,b,c]);
+        const wins=new Array(selected.length).fill(0);
+        const combo2wins=new Array(combos2.length).fill(0);
+        const combo3wins=new Array(combos3.length).fill(0);
 
-    // 模拟N次，统计每场结果
-    const wins=new Array(selected.length).fill(0);
-    const combo2wins=new Array(combos2.length).fill(0);
-    const combo3wins=new Array(combos3.length).fill(0);
+        for(let n=0;n<N;n++){
+          const results=selected.map(s=>simMatch(s.lH||1.3,s.lA||1.1)===s.winResult);
+          results.forEach((w,i)=>{if(w)wins[i]++;});
+          combos2.forEach(([a,b],ci)=>{if(results[a]&&results[b])combo2wins[ci]++;});
+          combos3.forEach(([a,b,c2],ci)=>{if(results[a]&&results[b]&&results[c2])combo3wins[ci]++;});
+        }
 
-    for(let n=0;n<N;n++){
-      // 模拟每场
-      const results=selected.map(s=>simMatch(s.lH,s.lA)===s.winResult);
-      results.forEach((w,i)=>{if(w)wins[i]++;});
-      combo2wins.forEach((_,ci)=>{
-        const[a,b]=combos2[ci];
-        if(results[a]&&results[b])combo2wins[ci]++;
-      });
-      combo3wins.forEach((_,ci)=>{
-        const[a,b,c]=combos3[ci];
-        if(results[a]&&results[b]&&results[c])combo3wins[ci]++;
-      });
-    }
+        const evClass=ev=>ev>=3?'ev-pos':ev>=-5?'ev-neu':'ev-neg';
 
-    // 各场命中率
-    const matchRows=selected.map((s,i)=>{
-      const simProb=wins[i]/N;
-      const diffVal=+((simProb-s.prob)*100).toFixed(1);
-      const diffCol=Math.abs(diffVal)<3?'var(--green)':Math.abs(diffVal)<6?'var(--gold)':'var(--red)';
-      return`<tr>
-        <td class="tl" style="font-size:11px">${s.label}</td>
-        <td style="color:${s.dir==='主胜'?'var(--green)':s.dir==='平局'?'var(--gold)':'var(--red)'};font-weight:700">${s.dir}</td>
-        <td style="font-family:var(--mono);color:var(--cyan)">@${s.odds}</td>
-        <td style="font-family:var(--mono)">${(s.prob*100).toFixed(1)}%</td>
-        <td style="font-family:var(--mono);color:var(--text)">${(simProb*100).toFixed(1)}%</td>
-        <td style="font-family:var(--mono);color:${diffCol}">${diffVal>0?'+':''}${diffVal}pp</td>
-      </tr>`;
-    }).join('');
+        const matchRows=selected.map((s,i)=>{
+          const simProb=+(wins[i]/N*100).toFixed(1);
+          const theorProb=+(s.prob*100).toFixed(1);
+          return`<tr>
+            <td class="tl" style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.label}</td>
+            <td style="color:${s.dir==='主胜'?'var(--green)':s.dir==='平局'?'var(--gold)':'var(--red)'};font-weight:700">${s.dir}</td>
+            <td style="font-family:var(--mono);color:var(--cyan)">${s.odds}x</td>
+            <td style="font-family:var(--mono)">${theorProb}%</td>
+            <td style="font-family:var(--mono);color:var(--green)">${simProb}%</td>
+          </tr>`;
+        }).join('');
 
-    // 二串一组合
-    const combo2rows=combos2.map(([a,b],ci)=>{
-      const sa=selected[a],sb=selected[b];
-      const combinedOdds=+(sa.odds*sb.odds).toFixed(2);
-      const theorProb=+(sa.prob*sb.prob*100).toFixed(2);
-      const simProb=+(combo2wins[ci]/N*100).toFixed(2);
-      const ev=+((sa.prob*sb.prob*combinedOdds-1)*100).toFixed(1);
-      const roi=+((combo2wins[ci]/N*combinedOdds-1)*100).toFixed(1);
-      const evCol=ev>0?'var(--green)':ev>-10?'var(--gold)':'var(--red)';
-      const roiCol=roi>0?'var(--green)':roi>-10?'var(--gold)':'var(--red)';
-      return{combinedOdds,theorProb,simProb,ev,roi,a,b,c,a,b,ci,evCol,roiCol,
-        row:`<tr style="border-left:3px solid ${ev>0?'var(--green)':ev>-10?'rgba(255,200,55,.5)':'rgba(255,61,90,.3)'}">
-          <td class="tl" style="font-size:10px;font-family:var(--mono);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label} [${sa.dir}] × ${sb.label} [${sb.dir}]</td>
-          <td style="font-family:var(--num);font-size:15px;font-weight:700;color:var(--or)">${combinedOdds}x</td>
-          <td style="font-family:var(--mono)">${theorProb}%</td>
-          <td style="font-family:var(--mono);color:var(--cyan)">${simProb}%</td>
-          <td style="font-family:var(--mono);font-weight:700" class="${evClass(ev)}">${ev>0?'+':''}${ev}%</td>
-          <td style="font-family:var(--mono);font-weight:700;color:${roiCol}">${roi>0?'+':''}${roi}%</td>
-        </tr>`};
-    }).sort((a,b)=>b.ev-a.ev);
+        const combo2rows=combos2.map(([a,b],ci)=>{
+          const sa=selected[a],sb=selected[b];
+          const combinedOdds=+(sa.odds*sb.odds).toFixed(2);
+          const theorProb=+(sa.prob*sb.prob*100).toFixed(2);
+          const simProb=+(combo2wins[ci]/N*100).toFixed(2);
+          const ev=+((theorProb/100*combinedOdds-1)*100).toFixed(1);
+          const roi=+((simProb/100*combinedOdds-1)*100).toFixed(1);
+          return{combinedOdds,theorProb,simProb,ev,roi,a,b,
+            row:`<tr>
+              <td class="tl" style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label}[${sa.dir}] × ${sb.label}[${sb.dir}]</td>
+              <td style="font-family:var(--mono);color:var(--or);font-weight:700">${combinedOdds}x</td>
+              <td style="font-family:var(--mono)">${theorProb}%</td>
+              <td style="font-family:var(--mono);color:var(--green)">${simProb}%</td>
+              <td class="${evClass(ev)}" style="font-family:var(--mono)">${ev>0?'+':''}${ev}%</td>
+              <td class="${evClass(roi)}" style="font-family:var(--mono)">${roi>0?'+':''}${roi}%</td>
+            </tr>`};
+        }).sort((x,y)=>y.ev-x.ev);
 
-    // 三串一组合
-    const combo3rows=combos3.map(([a,b,c],ci)=>{
-      const sa=selected[a],sb=selected[b],sc2=selected[c];
-      const combinedOdds=+(sa.odds*sb.odds*sc2.odds).toFixed(2);
-      const theorProb=+(sa.prob*sb.prob*sc2.prob*100).toFixed(2);
-      const simProb=+(combo3wins[ci]/N*100).toFixed(2);
-      const ev=+((sa.prob*sb.prob*sc2.prob*combinedOdds-1)*100).toFixed(1);
-      const roi=+((combo3wins[ci]/N*combinedOdds-1)*100).toFixed(1);
-      const roiCol=roi>0?'var(--green)':roi>-15?'var(--gold)':'var(--red)';
-      return{combinedOdds,theorProb,simProb,ev,roi,
-        row:`<tr style="border-left:3px solid ${ev>0?'var(--green)':ev>-15?'rgba(255,200,55,.5)':'rgba(255,61,90,.3)'}">
-          <td class="tl" style="font-size:10px;font-family:var(--mono);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label} [${sa.dir}] × ${sb.label} [${sb.dir}] × ${sc2.label} [${sc2.dir}]</td>
-          <td style="font-family:var(--num);font-size:15px;font-weight:700;color:var(--purple)">${combinedOdds}x</td>
-          <td style="font-family:var(--mono)">${theorProb}%</td>
-          <td style="font-family:var(--mono);color:var(--cyan)">${simProb}%</td>
-          <td style="font-family:var(--mono);font-weight:700" class="${evClass(ev)}">${ev>0?'+':''}${ev}%</td>
-          <td style="font-family:var(--mono);font-weight:700;color:${roiCol}">${roi>0?'+':''}${roi}%</td>
-        </tr>`};
-    }).sort((a,b)=>b.ev-a.ev);
+        const combo3rows=combos3.map(([a,b,c2],ci)=>{
+          const sa=selected[a],sb=selected[b],sc=selected[c2];
+          const combinedOdds=+(sa.odds*sb.odds*sc.odds).toFixed(2);
+          const theorProb=+(sa.prob*sb.prob*sc.prob*100).toFixed(2);
+          const simProb=+(combo3wins[ci]/N*100).toFixed(2);
+          const ev=+((theorProb/100*combinedOdds-1)*100).toFixed(1);
+          const roi=+((simProb/100*combinedOdds-1)*100).toFixed(1);
+          return{combinedOdds,theorProb,simProb,ev,roi,a,b,c:c2,
+            row:`<tr>
+              <td class="tl" style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sa.label}[${sa.dir}] × ${sb.label}[${sb.dir}] × ${sc.label}[${sc.dir}]</td>
+              <td style="font-family:var(--mono);color:var(--purple);font-weight:700">${combinedOdds}x</td>
+              <td style="font-family:var(--mono)">${theorProb}%</td>
+              <td style="font-family:var(--mono);color:var(--green)">${simProb}%</td>
+              <td class="${evClass(ev)}" style="font-family:var(--mono)">${ev>0?'+':''}${ev}%</td>
+              <td class="${evClass(roi)}" style="font-family:var(--mono)">${roi>0?'+':''}${roi}%</td>
+            </tr>`};
+        }).sort((x,y)=>y.ev-x.ev);
 
-    // 最优组合
-    const best2=combo2rows[0];
-    const best3=combo3rows[0]||null;
+        const best2=combo2rows[0]||null;
+        const best3=combo3rows[0]||null;
+        const thStyle='color:var(--sub2);font-size:10px;padding:4px 6px;white-space:nowrap';
+        const tblStyle='width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)';
 
-    result.innerHTML=`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <span style="font-size:13px;font-weight:700;color:var(--or)">📊 各场命中率验证</span>
-        <div style="flex:1;height:1px;background:var(--border2)"></div>
-        <span style="font-size:9px;color:var(--sub);font-family:var(--mono)">N=${N.toLocaleString()}次模拟</span>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px">
-        <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:11px">
-          <thead><tr style="background:var(--bg3)">
-            <th class="tl" style="padding:8px 10px;color:var(--sub);font-weight:600">场次</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">方向</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">赔率</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">理论概率</th>
-            <th style="padding:8px;color:var(--cyan);font-weight:600">模拟命中率</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">偏差</th>
-          </tr></thead>
-          <tbody>${matchRows}</tbody>
-        </table>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <span style="font-size:13px;font-weight:700;color:var(--or)">🔗 二串一组合排名</span>
-        <div style="flex:1;height:1px;background:var(--border2)"></div>
-        <span style="font-size:9px;color:var(--sub);font-family:var(--mono)">按EV从高到低</span>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px">
-        <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:11px">
-          <thead><tr style="background:var(--bg3)">
-            <th class="tl" style="padding:8px 10px;color:var(--sub);font-weight:600">组合</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">合计赔率</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">理论命中%</th>
-            <th style="padding:8px;color:var(--cyan);font-weight:600">模拟命中%</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">理论EV</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">模拟ROI</th>
-          </tr></thead>
-          <tbody>${combo2rows.map(r=>r.row).join('')}</tbody>
-        </table>
-        </div>
-      </div>
-
-      ${combo3rows.length?`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <span style="font-size:13px;font-weight:700;color:var(--purple)">🔗 三串一组合排名</span>
-        <div style="flex:1;height:1px;background:var(--border2)"></div>
-        <span style="font-size:9px;color:var(--sub);font-family:var(--mono)">按EV从高到低</span>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px">
-        <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:11px">
-          <thead><tr style="background:var(--bg3)">
-            <th class="tl" style="padding:8px 10px;color:var(--sub);font-weight:600">组合</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">合计赔率</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">理论命中%</th>
-            <th style="padding:8px;color:var(--cyan);font-weight:600">模拟命中%</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">理论EV</th>
-            <th style="padding:8px;color:var(--sub);font-weight:600">模拟ROI</th>
-          </tr></thead>
-          <tbody>${combo3rows.map(r=>r.row).join('')}</tbody>
-        </table>
-        </div>
-      </div>`:''}
-
-      <div style="background:linear-gradient(135deg,rgba(255,106,0,.08),rgba(255,200,55,.05));border:1px solid rgba(255,106,0,.25);border-radius:10px;padding:14px 16px">
-        <div style="font-size:13px;font-weight:700;color:var(--or);margin-bottom:8px">🏆 蒙特卡洛最优推荐</div>
-        <div style="font-size:11px;font-family:var(--mono);line-height:2;color:var(--text)">
-          <b style="color:var(--green)">最优二串一：</b>${selected[best2.a].label} <span style="color:${selected[best2.a].dir==='主胜'?'var(--green)':selected[best2.a].dir==='平局'?'var(--gold)':'var(--red)'}">[${selected[best2.a].dir}]</span> × ${selected[best2.b].label} <span style="color:${selected[best2.b].dir==='主胜'?'var(--green)':selected[best2.b].dir==='平局'?'var(--gold)':'var(--red)'}">[${selected[best2.b].dir}]</span>
-          · 赔率 <b style="color:var(--or)">${best2.combinedOdds}x</b> · 模拟命中率 <b style="color:var(--cyan)">${best2.simProb}%</b> · 理论EV <span class="${evClass(best2.ev)}">${best2.ev>0?'+':''}${best2.ev}%</span><br>
-          ${best3?`<b style="color:var(--purple)">最优三串一：</b>${selected[best3.a].label}[${selected[best3.a].dir}] × ${selected[best3.b].label}[${selected[best3.b].dir}] × ${selected[best3.c].label}[${selected[best3.c].dir}] · 赔率 <b style="color:var(--purple)">${best3.combinedOdds}x</b> · 模拟命中率 <b style="color:var(--cyan)">${best3.simProb}%</b> · 理论EV <span class="${evClass(best3.ev)}">${best3.ev>0?'+':''}${best3.ev}%</span><br>`:''}
-          <span style="color:var(--sub);font-size:10px">⚠ 蒙特卡洛模拟基于泊松概率，结果每次略有差异（±0.5%）。EV为负不代表不能中，代表长期期望为负。</span>
-        </div>
-      </div>`;
-  },50);
+        resultEl.innerHTML=`
+          <div style="margin-bottom:14px">
+            <div style="font-size:11px;color:var(--sub2);margin-bottom:6px;font-family:var(--mono)">📌 各场命中率</div>
+            <div style="overflow-x:auto"><table style="${tblStyle}">
+              <thead><tr>
+                <th style="${thStyle};text-align:left">场次</th>
+                <th style="${thStyle}">方向</th><th style="${thStyle}">赔率</th>
+                <th style="${thStyle}">理论%</th><th style="${thStyle}">模拟%</th>
+              </tr></thead>
+              <tbody>${matchRows}</tbody>
+            </table></div>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="font-size:11px;color:var(--sub2);margin-bottom:6px;font-family:var(--mono)">🔗 二串一组合（按EV排序）</div>
+            <div style="overflow-x:auto"><table style="${tblStyle}">
+              <thead><tr>
+                <th style="${thStyle};text-align:left">组合</th>
+                <th style="${thStyle}">赔率</th><th style="${thStyle}">理论%</th>
+                <th style="${thStyle}">模拟%</th><th style="${thStyle}">理论EV</th><th style="${thStyle}">模拟ROI</th>
+              </tr></thead>
+              <tbody>${combo2rows.map(r=>r.row).join('')}</tbody>
+            </table></div>
+          </div>
+          ${combo3rows.length?`<div style="margin-bottom:14px">
+            <div style="font-size:11px;color:var(--sub2);margin-bottom:6px;font-family:var(--mono)">🎯 三串一组合（按EV排序）</div>
+            <div style="overflow-x:auto"><table style="${tblStyle}">
+              <thead><tr>
+                <th style="${thStyle};text-align:left">组合</th>
+                <th style="${thStyle}">赔率</th><th style="${thStyle}">理论%</th>
+                <th style="${thStyle}">模拟%</th><th style="${thStyle}">理论EV</th><th style="${thStyle}">模拟ROI</th>
+              </tr></thead>
+              <tbody>${combo3rows.map(r=>r.row).join('')}</tbody>
+            </table></div>
+          </div>`:''}
+          <div style="background:linear-gradient(135deg,rgba(255,180,0,.08),rgba(255,100,0,.05));border:1px solid rgba(255,180,0,.2);border-radius:10px;padding:12px;font-size:12px;line-height:2">
+            <b style="color:var(--gold)">🏆 蒙特卡洛最优推荐</b><br>
+            ${best2?`<b style="color:var(--green)">最优二串一：</b>${selected[best2.a].label}【${selected[best2.a].dir}】× ${selected[best2.b].label}【${selected[best2.b].dir}】· 赔率 <b style="color:var(--or)">${best2.combinedOdds}x</b> · 模拟命中率 <b style="color:var(--cyan)">${best2.simProb}%</b> · 理论EV <span class="${evClass(best2.ev)}">${best2.ev>0?'+':''}${best2.ev}%</span><br>`:''}
+            ${best3?`<b style="color:var(--purple)">最优三串一：</b>${selected[best3.a].label}【${selected[best3.a].dir}】× ${selected[best3.b].label}【${selected[best3.b].dir}】× ${selected[best3.c].label}【${selected[best3.c].dir}】· 赔率 <b style="color:var(--purple)">${best3.combinedOdds}x</b> · 模拟命中率 <b style="color:var(--cyan)">${best3.simProb}%</b> · 理论EV <span class="${evClass(best3.ev)}">${best3.ev>0?'+':''}${best3.ev}%</span><br>`:''}
+            <span style="color:var(--sub);font-size:10px">⚠ 蒙特卡洛模拟基于泊松概率，结果每次略有差异（±0.5%）。EV为负不代表不能中，代表长期期望为负。</span>
+          </div>`;
+      }catch(e){
+        resultEl.innerHTML=`<div style="color:var(--red);font-size:12px;padding:8px">❌ 模拟出错：${e.message}</div>`;
+      }
+    });
+  });
 }
+
 </script>
 
 </body>
