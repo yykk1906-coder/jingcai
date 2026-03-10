@@ -799,7 +799,9 @@ async function fetchIndepLambda(homeCN,awayCN,leagueCN){
     const tidH=dH?.response?.[0]?.team?.id;
     const tidA=dA?.response?.[0]?.team?.id;
     if(!tidH||!tidA)return null;
-    const season=new Date().getFullYear();// 当前赛季
+    // 足球赛季：1-6月用上年（如2026年3月→赛季2025），7-12月用本年
+    const now=new Date();
+    const season=now.getMonth()<6?now.getFullYear()-1:now.getFullYear();
     // 获取主队近10场主场比赛、客队近10场客场比赛
     const [fixH,fixA]=await Promise.all([
       fetch(`${PROXY}/af/fixtures?team=${tidH}&league=${leagueId}&season=${season}&last=10&_key=${AF_KEY}`),
