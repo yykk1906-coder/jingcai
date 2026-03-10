@@ -10,13 +10,13 @@
 body{background:var(--bg);color:var(--text);font-family:sans-serif;font-size:13px}
 .nav{position:sticky;top:0;z-index:200;background:rgba(4,8,15,.96);border-bottom:1px solid var(--border2);height:52px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
 .logo{font-size:16px;font-weight:700;color:var(--or);letter-spacing:2px;display:flex;align-items:center;gap:8px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;flex-shrink:0}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .status{font-size:10px;color:var(--sub);display:flex;align-items:center;gap:6px}
-.sdot{width:8px;height:8px;border-radius:50%;background:var(--sub)}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--sub);transition:all .3s}
 .hero{background:linear-gradient(135deg,#08142a,#0d0520 55%,#08142a);border-bottom:1px solid var(--border2);padding:20px 16px;text-align:center}
 .hero h1{font-size:clamp(20px,5vw,34px);font-weight:700;letter-spacing:3px;background:linear-gradient(135deg,var(--purple),var(--cyan) 60%,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{font-size:10px;color:var(--sub2);margin-top:4px}
+.hero p{font-size:10px;color:var(--sub2);margin-top:4px;font-family:monospace}
 .main{max-width:980px;margin:0 auto;padding:14px 12px 60px}
 .note{font-size:11px;color:var(--sub2);padding:8px 12px;background:rgba(167,139,250,.04);border:1px solid rgba(167,139,250,.12);border-radius:6px;line-height:1.8;margin-bottom:10px}
 .ctrl{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -30,10 +30,10 @@ body{background:var(--bg);color:var(--text);font-family:sans-serif;font-size:13p
 .mlist.show{display:flex}
 .mitem{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap;transition:all .2s}
 .mitem:hover,.mitem.sel{border-color:rgba(0,229,160,.4);background:rgba(0,229,160,.04)}
-.tag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:monospace;background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.2)}
+.tag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:monospace;background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.2);white-space:nowrap}
 .mname{font-size:14px;font-weight:500;flex:1}
-.mtime{font-size:10px;color:var(--sub);font-family:monospace}
-.mcnt{font-size:9px;font-family:monospace}
+.mtime{font-size:10px;color:var(--sub);font-family:monospace;white-space:nowrap}
+.mcnt{font-size:9px;font-family:monospace;white-space:nowrap}
 .result{display:none}
 .result.show{display:block}
 .mh{background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(56,182,255,.05));border:1px solid rgba(167,139,250,.18);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -52,7 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:sans-serif;font-size:13p
 .tr-ev{font-size:12px;font-weight:700;font-family:monospace}
 .gtitle{font-size:10px;color:var(--sub2);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);font-family:monospace}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:5px;margin-bottom:12px}
-.bcell{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px 8px;transition:all .2s}
+.bcell{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px 8px}
 .bcell.best{border-color:rgba(0,229,160,.4);background:rgba(0,229,160,.05)}
 .bcell.good{border-color:rgba(255,200,55,.3);background:rgba(255,200,55,.03)}
 .bsc{font-size:15px;font-weight:700;line-height:1;margin-bottom:3px}
@@ -79,10 +79,10 @@ body{background:var(--bg);color:var(--text);font-family:sans-serif;font-size:13p
 </div>
 <div class="hero">
   <h1>比分赔率自动精算</h1>
-  <p>AUTO-FETCH zhcw.com · POISSON EV ENGINE · 竞彩22种比分</p>
+  <p>AUTO-FETCH · POISSON EV ENGINE · 竞彩22种比分</p>
 </div>
 <div class="main">
-  <div class="note">数据源：<b style="color:var(--cyan)">jc.zhcw.com</b> · 跨域开放 · 点「拉取」选场次 → 泊松精算+EV</div>
+  <div class="note">数据源：<b style="color:var(--cyan)">中彩网竞彩</b> · 经Cloudflare中转 · 点「拉取」选场次 → 泊松精算+EV全览</div>
   <div class="ctrl">
     <button class="btn btn-main" id="btnf" onclick="fetchData()">⚡ 自动拉取当日赔率</button>
     <button class="btn btn-sec" onclick="loadDemo()">📋 示例数据</button>
@@ -92,49 +92,50 @@ body{background:var(--bg);color:var(--text);font-family:sans-serif;font-size:13p
   <div class="result" id="result"></div>
 </div>
 <script>
+const PROXY='https://proxy.947552250.workers.dev';
 const W=['1:0','2:0','2:1','3:0','3:1','3:2','4:0','4:1','5:0'];
 const D=['0:0','1:1','2:2','3:3'];
 const L=['0:1','0:2','1:2','0:3','1:3','2:3','0:4','1:4','0:5'];
 const ALL=[...W,...D,...L];
 const BFM={h1:'1:0',h2:'2:0',h3:'2:1',h4:'3:0',h5:'3:1',h6:'3:2',h7:'4:0',h8:'4:1',h9:'4:2',h10:'5:0',d1:'0:0',d2:'1:1',d3:'2:2',d4:'3:3',a1:'0:1',a2:'0:2',a3:'1:2',a4:'0:3',a5:'1:3',a6:'2:3',a7:'0:4',a8:'1:4',a9:'2:4',a10:'0:5'};
-const LAV={'意甲':2.65,'西甲':2.70,'德甲':3.05,'法甲':2.55,'英超':2.80,'欧冠':2.90,'MLS':2.95};
+const LAV={'意甲':2.65,'西甲':2.70,'德甲':3.05,'法甲':2.55,'英超':2.80,'欧冠':2.90,'MLS':2.95,'亚冠':2.60,'英冠':2.75};
 const ag=l=>{for(const k of Object.keys(LAV))if((l||'').includes(k))return LAV[k];return 2.70};
 const ppf=(λ,k)=>{if(k<0||λ<=0)return 0;let lp=-λ+k*Math.log(λ);for(let i=1;i<=k;i++)lp-=Math.log(i);return Math.exp(lp)};
 const cp=(lH,lA)=>{let H=0,D=0,A=0;for(let i=0;i<=8;i++)for(let j=0;j<=8;j++){const p=ppf(lH,i)*ppf(lA,j);if(i>j)H+=p;else if(i===j)D+=p;else A+=p}const t=H+D+A;return[H/t,D/t,A/t]};
 const fl=(pH,pD,pA,avg)=>{let lH=avg*(0.5+(pH-pA)*0.42),lA=avg-lH;lH=Math.max(0.18,Math.min(3.9,lH));lA=Math.max(0.18,Math.min(3.9,lA));for(let i=0;i<180;i++){const[cH,,cA]=cp(lH,lA);lH=Math.max(0.15,lH+(pH-cH)*0.055);lA=Math.max(0.15,lA+(pA-cA)*0.055)}return[+lH.toFixed(3),+lA.toFixed(3)]};
 const bm=(lH,lA)=>{const m=[];let tot=0;for(let i=0;i<=5;i++){m[i]=[];for(let j=0;j<=5;j++){m[i][j]=ppf(lH,i)*ppf(lA,j);tot+=m[i][j]}}for(let i=0;i<=5;i++)for(let j=0;j<=5;j++)m[i][j]/=tot;return m};
-const ss=(msg,st)=>{document.getElementById('smsg').textContent=msg;const d=document.getElementById('sdot');const c={idle:'#4d6a8a',load:'#ffc837',ok:'#00e5a0',err:'#ff3d5a'};d.style.background=c[st]||c.idle;d.style.boxShadow=st!=='idle'?`0 0 6px ${c[st]}`:'none'};
+const ss=(msg,st)=>{document.getElementById('smsg').textContent=msg;const d=document.getElementById('sdot');const c={idle:'#4d6a8a',load:'#ffc837',ok:'#00e5a0',err:'#ff3d5a'};d.style.background=c[st];d.style.boxShadow=st!=='idle'?`0 0 6px ${c[st]}`:'none'};
 const ec=ev=>ev===null?'ev-n':ev>0?'ev-g':ev>-10?'ev-m':'ev-b';
-const el=ev=>ev===null?'无赔率':ev>0?`+${ev.toFixed(1)}%`:`${ev.toFixed(1)}%`;
+const evl=ev=>ev===null?'无赔率':ev>0?`+${ev.toFixed(1)}%`:`${ev.toFixed(1)}%`;
 const to=sc=>{const[h,a]=sc.split(':').map(Number);return h>a?'w':h===a?'d':'l'};
 const tc=t=>t==='w'?'var(--green)':t==='d'?'var(--gold)':'var(--red)';
 const tn=t=>t==='w'?'主胜':t==='d'?'平局':'客胜';
 let AM=[];
 async function fetchData(){
   document.getElementById('btnf').disabled=true;
-  ss('正在拉取…','load');
   document.getElementById('afail').classList.remove('show');
+  ss('正在拉取…','load');
   try{
-    const r=await fetch(`https://jc.zhcw.com/port/client_json.php?transactionType=10002102&tt=${Math.random()}&_=${Date.now()}`);
+    const r=await fetch(PROXY);
     if(!r.ok)throw new Error();
     const d=await r.json();
-    if(d.reCode!=='000000')throw new Error();
-    const raw=d?.data||d?.jczqMatchList||[];
+    const raw=d?.data||[];
     if(!raw.length)throw new Error();
-    procData(raw);
-  }catch(e){fail()}
+    const ms=raw.map(m=>{
+      const bf=m.wf?.bf||m.bf||{};const sc={};
+      Object.entries(BFM).forEach(([k,s])=>{const v=parseFloat(bf[k]?.z||bf[k]||0);if(v>0)sc[s]=v});
+      const sp=m.wf?.spf||m.spf||{};
+      return{id:m.matchNum||'',league:m.leagueName||'',home:m.homeName||'',away:m.guestName||'',time:(m.time||'').slice(5,16),spf:{h:parseFloat(sp.h?.z||sp.h||0),d:parseFloat(sp.d?.z||sp.d||0),a:parseFloat(sp.a?.z||sp.a||0)},scores:sc,cnt:Object.keys(sc).length};
+    }).filter(m=>m.home&&m.away);
+    if(!ms.length)throw new Error();
+    ss(`已加载 ${ms.length} 场`,'ok');
+    renderList(ms);
+  }catch(e){
+    ss('拉取失败，已切换示例','err');
+    document.getElementById('afail').classList.add('show');
+    loadDemo();
+  }
   document.getElementById('btnf').disabled=false;
-}
-function fail(){ss('失败，已切换示例','err');document.getElementById('afail').classList.add('show');document.getElementById('btnf').disabled=false;loadDemo()}
-function procData(raw){
-  const ms=raw.map(m=>{
-    const bf=m.wf?.bf||m.bf||{};const sc={};
-    Object.entries(BFM).forEach(([k,s])=>{const v=parseFloat(bf[k]?.z||bf[k]||0);if(v>0)sc[s]=v});
-    const sp=m.wf?.spf||m.spf||{};
-    return{id:m.matchNum||m.num||'',league:m.leagueName||'',home:m.homeName||m.homeTeamName||'',away:m.guestName||m.awayTeamName||'',time:(m.time||m.matchTime||'').slice(5,16).replace('T',' '),spf:{h:parseFloat(sp.h?.z||sp.h||0),d:parseFloat(sp.d?.z||sp.d||0),a:parseFloat(sp.a?.z||sp.a||0)},scores:sc,cnt:Object.keys(sc).length};
-  }).filter(m=>m.home&&m.away);
-  if(!ms.length){fail();return}
-  ss(`已加载 ${ms.length} 场`,'ok');renderList(ms);
 }
 function loadDemo(){
   ss('示例数据','ok');
@@ -147,7 +148,7 @@ function renderList(ms){
   AM=ms;
   document.getElementById('mlist').innerHTML=ms.map((m,i)=>`
     <div class="mitem" id="mi${i}" onclick="sel(${i})">
-      <span class="tag">${m.league}</span>
+      <span class="tag">${m.league||'竞彩'}</span>
       <span class="mname">${m.home} <span style="color:var(--sub)">vs</span> ${m.away}</span>
       <span class="mtime">${m.time}</span>
       <span style="font-size:13px;font-weight:700"><span style="color:var(--green)">${m.spf.h||'—'}</span>/<span style="color:var(--gold)">${m.spf.d||'—'}</span>/<span style="color:var(--red)">${m.spf.a||'—'}</span></span>
@@ -161,7 +162,8 @@ function sel(idx){
   const m=AM[idx];
   const{h,d,a}=m.spf;
   let pH,pD,pA;
-  if(h>0&&d>0&&a>0){const r=[1/h,1/d,1/a],t=r.reduce((s,v)=>s+v,0);[pH,pD,pA]=r.map(v=>v/t)}else{pH=0.4;pD=0.3;pA=0.3}
+  if(h>0&&d>0&&a>0){const r=[1/h,1/d,1/a],t=r.reduce((s,v)=>s+v,0);[pH,pD,pA]=r.map(v=>v/t)}
+  else{pH=0.4;pD=0.3;pA=0.3}
   const avg=ag(m.league);const[lH,lA]=fl(pH,pD,pA,avg);const mat=bm(lH,lA);const[vH,vD,vA]=cp(lH,lA);
   let maxP=0,maxSc='1:0';const em={};
   ALL.forEach(sc=>{const[hg,ag2]=sc.split(':').map(Number);const p=(hg<=5&&ag2<=5)?mat[hg][ag2]:0;if(p>maxP){maxP=p;maxSc=sc}const od=m.scores[sc]||0;em[sc]={p,od,ev:od>0?(p*od-1)*100:null}});
@@ -175,16 +177,12 @@ function sel(idx){
       <div class="lbox"><div class="ll">最高概率</div><div class="lv" style="color:var(--gold);font-size:17px">${maxSc}</div><div style="font-size:9px;color:var(--sub);font-family:monospace">${(maxP*100).toFixed(2)}%</div></div>
       <div class="lbox" style="border-color:rgba(255,61,90,.2)"><div class="ll">其他比分⚠</div><div class="lv" style="color:var(--red)">${oP.toFixed(1)}%</div></div>
     </div>
-    ${rk.length?`<div class="sec"><div class="sec-t">★ EV TOP5</div><div class="sec-line"></div></div>
-    <div class="top-card"><div class="top-title">TOP5（有竞彩官方赔率）</div>
-    ${rk.slice(0,5).map((sc,i)=>{const{p,od,ev}=em[sc];const t=to(sc);const g=['var(--gold)','#c0c0c0','#cd7f32','var(--sub)','var(--sub)'][i];return`<div class="trow"><span class="tr-rk" style="color:${g}">${i+1}</span><span class="tr-sc" style="color:${tc(t)}">${sc}</span><span class="tr-info">P:${(p*100).toFixed(2)}%·@${od}·${tn(t)}</span><span class="tr-ev ${ec(ev)}">${el(ev)}</span></div>`}).join('')}</div>`:''}
+    ${rk.length?`<div class="sec"><div class="sec-t">★ EV TOP5</div><div class="sec-line"></div></div><div class="top-card"><div class="top-title">TOP5（有竞彩官方赔率）</div>${rk.slice(0,5).map((sc,i)=>{const{p,od,ev}=em[sc];const t=to(sc);const g=['var(--gold)','#c0c0c0','#cd7f32','var(--sub)','var(--sub)'][i];return`<div class="trow"><span class="tr-rk" style="color:${g}">${i+1}</span><span class="tr-sc" style="color:${tc(t)}">${sc}</span><span class="tr-info">P:${(p*100).toFixed(2)}%·@${od}·${tn(t)}</span><span class="tr-ev ${ec(ev)}">${evl(ev)}</span></div>`}).join('')}</div>`:''}
     <div class="sec"><div class="sec-t">EV 全览</div><div class="sec-line"></div></div>
-    ${[['▶ 主胜',W,'w'],['▶ 平局',D,'d'],['▶ 客胜',L,'l']].map(([tt,scs,tp])=>`<div class="gtitle">${tt}</div><div class="bgrid">${scs.map(sc=>{const{p,od,ev}=em[sc];return`<div class="bcell${ev!==null&&ev>-5?' best':ev!==null&&ev>-12?' good':''}"><div class="bsc ${tp}">${sc}</div><div class="bp">P:${(p*100).toFixed(2)}%</div>${od>0?`<div class="bod">@${od}</div><div class="bev ${ec(ev)}">${el(ev)}</div>`:'<div class="bev ev-n">无赔率</div>'}</div>`}).join('')}</div>`).join('')}
+    ${[['▶ 主胜',W,'w'],['▶ 平局',D,'d'],['▶ 客胜',L,'l']].map(([tt,scs,tp])=>`<div class="gtitle">${tt}</div><div class="bgrid">${scs.map(sc=>{const{p,od,ev}=em[sc];return`<div class="bcell${ev!==null&&ev>-5?' best':ev!==null&&ev>-12?' good':''}"><div class="bsc ${tp}">${sc}</div><div class="bp">P:${(p*100).toFixed(2)}%</div>${od>0?`<div class="bod">@${od}</div><div class="bev ${ec(ev)}">${evl(ev)}</div>`:'<div class="bev ev-n">无赔率</div>'}</div>`}).join('')}</div>`).join('')}
     <div class="sec"><div class="sec-t">概率矩阵</div><div class="sec-line"></div></div>
-    <div class="mwrap"><div class="mtitle">POISSON 6×6 · 行=主队 · 列=客队</div>
-    <table class="mtx"><tr><th>${m.home}↓/↓${m.away}</th>${[0,1,2,3,4,5].map(j=>`<th>客${j}</th>`).join('')}</tr>
-    ${[0,1,2,3,4,5].map(i=>`<tr><th style="background:var(--bg3);padding:5px 6px;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:monospace">主${i}</th>${[0,1,2,3,4,5].map(j=>{const p=mat[i][j];const al=Math.min(0.38,p/maxP*0.38).toFixed(2);const bg=i>j?`rgba(0,229,160,${al})`:i===j?`rgba(255,200,55,${al})`:`rgba(255,61,90,${al})`;return`<td style="background:${bg};outline:${p===maxP?'2px solid var(--gold)':'none'}"><span class="cv">${(p*100).toFixed(1)}%</span><span class="cs">${i}:${j}</span></td>`}).join('')}</tr>`).join('')}</table></div>
-    <div class="note">⚠ <b style="color:var(--gold)">其他比分=${oP.toFixed(1)}%</b> 不在竞彩22种内。单个比分命中率低，建议小额辅助配置。</div>`;
+    <div class="mwrap"><div class="mtitle">POISSON 6×6 · 行=主队 · 列=客队</div><table class="mtx"><tr><th>${m.home}↓/${m.away}→</th>${[0,1,2,3,4,5].map(j=>`<th>客${j}</th>`).join('')}</tr>${[0,1,2,3,4,5].map(i=>`<tr><th style="background:var(--bg3);padding:5px 6px;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:monospace">主${i}</th>${[0,1,2,3,4,5].map(j=>{const p=mat[i][j];const al=Math.min(0.38,p/maxP*0.38).toFixed(2);const bg=i>j?`rgba(0,229,160,${al})`:i===j?`rgba(255,200,55,${al})`:`rgba(255,61,90,${al})`;return`<td style="background:${bg};outline:${p===maxP?'2px solid var(--gold)':'none'}"><span class="cv">${(p*100).toFixed(1)}%</span><span class="cs">${i}:${j}</span></td>`}).join('')}</tr>`).join('')}</table></div>
+    <div class="note">⚠ <b style="color:var(--gold)">其他比分=${oP.toFixed(1)}%</b> 不在竞彩22种内。单个比分命中率低，建议小额辅助。</div>`;
   document.getElementById('result').classList.add('show');
   document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
 }
