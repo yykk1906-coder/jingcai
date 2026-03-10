@@ -1642,17 +1642,23 @@ function buildMCPicks(){
         </label>`).join('')}
       </div>
     </div>`).join('');
-  // 写入两个容器（精算tab内mc-section里的mc-picks，以及独立MC tab里的mc-picks）
-  document.querySelectorAll('#mc-picks').forEach(el=>el.innerHTML=picksHtml);
+  // 只写入串关Tab的mc-picks（唯一容器）
+  const mcPicksEl=document.getElementById('mc-picks');
+  if(mcPicksEl)mcPicksEl.innerHTML=picksHtml;
 }
 
 function mcToggleSkip(i){
-  const skip=document.getElementById(`mc-skip-${i}`).checked;
+  const skipEls=document.querySelectorAll(`[id="mc-skip-${i}"]`);
+  const skip=Array.from(skipEls).some(el=>el.checked);
+  // 同步所有同名checkbox状态
+  skipEls.forEach(el=>el.checked=skip);
   [0,1,2].forEach(j=>{
-    const el=document.getElementById(`mc-opt-${i}-${j}`);
-    if(el)el.style.opacity=skip?'0.3':'1';
-    const inp=el?.querySelector('input');
-    if(inp)inp.disabled=skip;
+    const els=document.querySelectorAll(`[id="mc-opt-${i}-${j}"]`);
+    els.forEach(el=>{
+      el.style.opacity=skip?'0.3':'1';
+      const inp=el?.querySelector('input');
+      if(inp)inp.disabled=skip;
+    });
   });
 }
 
@@ -1716,8 +1722,7 @@ function runMonteCarlo(){
   // 收集用户选择
   const selected=[];
   mcPool.forEach((m,i)=>{
-    // 修复：两个mc-picks容器里都有同名checkbox，取任意一个checked=true就跳过
-    const skipEls=document.querySelectorAll(`#mc-skip-${i}`);
+    const skipEls=document.querySelectorAll(`[id="mc-skip-${i}"]`);
     const skip=Array.from(skipEls).some(el=>el.checked);
     if(skip)return;
     const radios=document.querySelectorAll(`input[name="mc-pick-${i}"]`);
