@@ -1692,6 +1692,11 @@ function autoSelectAndRun(){
   // 直接计算每场最优方向，不依赖DOM
   const selected=[];
   mcPool.forEach((m,i)=>{
+    // 检查是否勾了「不选此场」
+    const skipEl=document.getElementById('mc-picks')
+      ?.querySelector(`[id="mc-skip-${i}"]`);
+    if(skipEl?.checked)return;
+
     let bestJ=0,bestEV=-99;
     m.options.forEach((o,j)=>{
       const ev=o.prob*o.odds-1;
