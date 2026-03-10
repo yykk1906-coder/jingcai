@@ -547,7 +547,8 @@ tr:hover td{background:rgba(255,106,0,.02)}
   <div id="mc-section" style="display:none">
     <div id="mc-picks" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-      <button onclick="runMonteCarlo()" style="padding:10px 24px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;background:linear-gradient(135deg,var(--or),var(--gold));color:#000;letter-spacing:.8px">🎲 开始模拟 10000次</button>
+      <button onclick="autoSelectAndRun()" style="padding:10px 24px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:700;background:linear-gradient(135deg,#00e5a0,#38b6ff);color:#000;letter-spacing:.8px">🚀 自动最优串关</button>
+      <button onclick="runMonteCarlo()" style="padding:10px 24px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;background:linear-gradient(135deg,var(--or),var(--gold));color:#000;letter-spacing:.8px">🎲 手动选择后模拟</button>
       <span style="font-size:10px;color:var(--sub);font-family:var(--mono)">至少选2场 · 未选方向的场次自动跳过</span>
     </div>
     <div id="mc-result"></div>
@@ -1674,6 +1675,41 @@ function poissonRandom(lambda){
 function simMatch(lH,lA){
   const g1=poissonRandom(lH),g2=poissonRandom(lA);
   return g1>g2?'W':g1===g2?'D':'L';
+}
+
+// 自动选最优方向并运行蒙特卡洛
+function autoSelectAndRun(){
+  if(!mcPool.length){
+    document.getElementById('mc-result').innerHTML='<div style="color:var(--red);font-size:12px;padding:8px">⚠ 请先在精算引擎Tab拉取数据</div>';
+    return;
+  }
+  // 每场自动选EV最优方向（EV=prob*odds-1）
+  // 若全负EV则选概率最高方向
+  mcPool.forEach((m,i)=>{
+    // 取消不选此场
+    const skipEl=document.getElementById('mc-skip-'+i);
+    if(skipEl)skipEl.checked=false;
+    mcToggleSkip(i);// 恢复显示
+
+    let bestJ=0,bestEV=-99;
+    m.options.forEach((o,j)=>{
+      const ev=o.prob*o.odds-1;
+      if(ev>bestEV){bestEV=ev;bestJ=j;}
+    });
+    // 若最优EV也是负的，改选概率最高方向
+    if(bestEV<-0.15){
+      let bestProb=0;
+      m.options.forEach((o,j)=>{if(o.prob>bestProb){bestProb=o.prob;bestJ=j;}});
+    }
+    // 选中该radio
+    const radios=document.querySelectorAll('input[name="mc-pick-'+i+'"]');
+    radios.forEach((r,j)=>{
+      r.checked=(j===bestJ);
+      if(j===bestJ)mcHighlight(i,j);
+    });
+  });
+  // 自动运行模拟
+  runMonteCarlo();
 }
 
 function runMonteCarlo(){
