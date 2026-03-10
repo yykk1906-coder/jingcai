@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>竞彩精算引擎 PRO v9 · 比分精算整合版</title>
+<title>竞彩精算引擎 PRO v10 · 全玩法精算整合版</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -173,7 +173,7 @@ tr:hover td{background:rgba(255,106,0,.02)}
   <div class="nav-chips">
     <span class="nchip nc-g">● SR实时</span>
     <span class="nchip nc-p">★ EV精算</span>
-    <span class="nchip nc-o">v8引擎</span>
+    <span class="nchip nc-o">v10引擎</span>
   </div>
   <div class="nav-date">2026·03·09</div>
 </div>
@@ -182,7 +182,7 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
 <div class="hero">
   <div class="hero-title">竞彩精算引擎 PRO</div>
-  <div class="hero-sub">PROFESSIONAL EXPECTED VALUE · SR REAL-TIME · MULTI-MODEL ANALYSIS · 2026-03-09</div>
+  <div class="hero-sub">PROFESSIONAL EV · POISSON+DC · 比分/让球/总进球/半全场 · 全玩法精算 v10</div>
   <div class="model-row">
     <span class="mchip mc1">泊松分布</span><span class="mchip mc1">Dixon-Coles</span>
     <span class="mchip mc2">Elo评分</span><span class="mchip mc2">近状加权</span>
@@ -432,13 +432,14 @@ tr:hover td{background:rgba(255,106,0,.02)}
 <!-- ══ TAB 4: 比分精算 ══ -->
 
 <div id="tab-score" class="section">
-  <div class="sec"><div class="sec-num">🎯</div><div class="sec-title">比分精算引擎</div><div class="sec-sub">真实赔率自动拉取 · Dixon-Coles修正 · 竞彩22种比分EV</div><div class="sec-line"></div></div>
+  <div class="sec"><div class="sec-num">🎯</div><div class="sec-title">全玩法精算引擎 v10</div><div class="sec-sub">比分·让球·总进球·半全场 · 真实赔率拉取 · Dixon-Coles修正 · 泊松EV精算</div><div class="sec-line"></div></div>
 
   <!-- 引擎说明 -->
 
   <div class="tbl-note" style="margin-bottom:10px">
-    <b style="color:var(--cyan)">精算方法：</b>①真实胜平负赔率→去水份概率 ②泊松λ拟合 ③Dixon-Coles修正低比分偏差 ④比分赔率EV=理论概率×官方赔率−1<br>
-    <b style="color:var(--or)">红线：</b>无真实赔率的场次显示⛔，不做EV计算，不编造数据。
+    <b style="color:var(--cyan)">精算方法：</b>①真实胜平负赔率→去水份→泊松λ拟合 ②DC修正低比分矩阵 ③比分/让球/总进球/半全场EV = 理论概率×竞彩赔率−1<br>
+    <b style="color:var(--gold)">让球：</b>泊松矩阵直接算让N球后胜平负概率 · <b style="color:var(--blue)">总进球：</b>泊松累积分布算各档概率 · <b style="color:var(--purple)">半全场：</b>9种结果逐一精算<br>
+    <b style="color:var(--red)">红线：</b>无真实赔率场次显示⛔，不做EV，不编造数据。
   </div>
 
   <!-- 控制栏 -->
@@ -589,33 +590,46 @@ tr:hover td{background:rgba(255,106,0,.02)}
   <div class="sec"><div class="sec-num">📋</div><div class="sec-title">数据说明</div><div class="sec-sub">数据来源 · 计算方法 · 精算引擎覆盖</div><div class="sec-line"></div></div>
 
   <div class="info-block">
+    <h3>v10引擎 — 全玩法精算升级</h3>
+    <table class="info-tbl">
+      <tr><td>比分精算</td><td>泊松分布+Dixon-Coles修正（ρ=−0.13），拟合λ主/λ客，精算28种比分理论概率×竞彩赔率=EV。</td></tr>
+      <tr><td>让球胜平负</td><td>基于同一泊松矩阵，直接累积主净胜球>让球数/等于/小于，得让球后真实胜平负概率，对比竞彩让球赔率算EV。</td></tr>
+      <tr><td>总进球数</td><td>λ主+λ客=合并泊松参数，泊松PMF直接算P(总进球=k)，覆盖0/1/2/3/4/5/6/7+共8档。</td></tr>
+      <tr><td>半全场</td><td>半场λ≈全场46%，枚举半场/下半场进球组合，得9种半全场结果概率，对比半全场赔率算EV。</td></tr>
+      <tr><td>水位分析</td><td>水位=Σ(1/赔率)−1，各玩法分别计算，竞彩正常水位12-14%，高于15%需警惕。</td></tr>
+      <tr><td>BTTS/Over</td><td>BTTS=P(主进≥1)×P(客进≥1)，Over2.5=P(总进球≥3)，均为精算输出。</td></tr>
+    </table>
+  </div>
+
+  <div class="info-block">
     <h3>本期数据来源</h3>
     <table class="info-tbl">
-      <tr><td>SR概率</td><td>SportRadar API 实时胜平负概率，采集时间 2026-03-09 19:22 北京时间。覆盖意甲(004)、西甲(006)。</td></tr>
-      <tr><td>官方赔率</td><td>用户提供竞彩官方截图（北京时间 19:41），来源：竞彩足球计算器。</td></tr>
-      <tr><td>无SR场次</td><td>003英足总杯、005法乙、007葡超：SR枚举不覆盖，不做EV计算，仅提供赔率数据。</td></tr>
+      <tr><td>SR概率</td><td>SportRadar API 实时胜平负概率，覆盖意甲(004)、西甲(006)。</td></tr>
+      <tr><td>竞彩赔率</td><td>中彩网竞彩接口实时拉取：SPF(10002101)·比分(10002102)·让球(10002103)·总进球(10002104)·半全场(10002105)。</td></tr>
+      <tr><td>无SR场次</td><td>003英足总杯、005法乙、007葡超：SR枚举不覆盖，比分精算仍可运行（纯泊松），但EV仅供参考。</td></tr>
     </table>
   </div>
 
   <div class="info-block">
     <h3>EV计算公式</h3>
-    <p>EV（期望价值）= SR概率 × 官方赔率 − 1</p>
-    <p>例：006奥维耶多客胜 → EV = 0.212 × 4.60 − 1 = −2.5%</p>
-    <p>抽水率 = Σ(1/各赔率) − 1（衡量庄家利润空间）</p>
+    <p>EV（期望价值）= 理论概率 × 竞彩官方赔率 − 1</p>
+    <p>例：让球赔率主让1球让胜@1.72，泊松让胜概率55.0% → EV = 0.55×1.72−1 = −5.4%</p>
+    <p>例：总进球3球@4.8，泊松P(3)=18.5% → EV = 0.185×4.8−1 = −11.2%</p>
     <table class="info-tbl">
-      <tr><td>正期望(EV&gt;0)</td><td>理论上长期有利，今日无此场次</td></tr>
-      <tr><td>EV−5%以内</td><td>接近公允，相对值得参考</td></tr>
-      <tr><td>EV−10%以上</td><td>损耗较大，不建议投注</td></tr>
+      <tr><td>正期望(EV&gt;0)</td><td>理论上长期有利，需严格验证概率来源</td></tr>
+      <tr><td>EV−5%以内</td><td>相对公允，庄家定价较准确</td></tr>
+      <tr><td>EV−10%以上</td><td>损耗过大，对应结果被庄家低估</td></tr>
     </table>
   </div>
 
   <div class="info-block">
-    <h3>精算引擎联赛覆盖</h3>
+    <h3>DC修正说明</h3>
+    <p>Dixon-Coles修正（ρ=−0.13）：标准足球模型参数，修正0:0/1:1/1:0/0:1四格低比分在纯泊松下的轻微偏差。ρ为负值表示低比分概率相比纯泊松略微下调，高比分略微上调，更符合真实比赛数据。</p>
     <table class="info-tbl">
-      <tr><td>🟢 A级(SR实时)</td><td>英超·西甲·意甲·德甲·法甲·MLS·欧冠</td></tr>
-      <tr><td>🟡 B级(知识库)</td><td>英冠·葡超(历史统计参考)</td></tr>
-      <tr><td>🔵 C级(知识库)</td><td>J1/J2·K联赛·澳超·女亚杯·亚冠精英/二级</td></tr>
-      <tr><td>⛔ 不覆盖</td><td>荷甲·德乙·法乙·英足总杯·欧罗巴(非固定)</td></tr>
+      <tr><td>精算引擎联赛</td><td>🟢 A级(SR实时)：英超·西甲·意甲·德甲·法甲·MLS·欧冠</td></tr>
+      <tr><td></td><td>🟡 B级(知识库)：英冠·葡超(历史统计参考)</td></tr>
+      <tr><td></td><td>🔵 C级(知识库)：J1/J2·K联赛·澳超·女亚杯·亚冠精英/二级</td></tr>
+      <tr><td></td><td>⛔ 不覆盖SR：荷甲·德乙·法乙·英足总杯·欧罗巴</td></tr>
     </table>
   </div>
 </div>
@@ -682,21 +696,28 @@ window.addEventListener('load',()=>{
   },200);
 });
 
-// ══ 比分精算引擎 ══
+// ══ 全玩法精算引擎 v10 ══
 const PROXY='https://proxy.947552250.workers.dev';
+
+// 竞彩比分28种具体比分（官方31种中去掉"胜其它/平其它/负其它"三种归类项）
 const CRS={crs10Odds:'1:0',crs20Odds:'2:0',crs21Odds:'2:1',crs30Odds:'3:0',crs31Odds:'3:1',crs32Odds:'3:2',crs40Odds:'4:0',crs41Odds:'4:1',crs42Odds:'4:2',crs50Odds:'5:0',crs51Odds:'5:1',crs52Odds:'5:2',crs00Odds:'0:0',crs11Odds:'1:1',crs22Odds:'2:2',crs33Odds:'3:3',crs01Odds:'0:1',crs02Odds:'0:2',crs12Odds:'1:2',crs03Odds:'0:3',crs13Odds:'1:3',crs23Odds:'2:3',crs04Odds:'0:4',crs14Odds:'1:4',crs24Odds:'2:4',crs05Odds:'0:5',crs15Odds:'1:5',crs25Odds:'2:5'};
-const SW=['1:0','2:0','2:1','3:0','3:1','3:2','4:0','4:1','5:0'];
+const SW=['1:0','2:0','2:1','3:0','3:1','3:2','4:0','4:1','4:2','5:0','5:1','5:2'];
 const SD=['0:0','1:1','2:2','3:3'];
-const SL=['0:1','0:2','1:2','0:3','1:3','2:3','0:4','1:4','0:5'];
+const SL=['0:1','0:2','1:2','0:3','1:3','2:3','0:4','1:4','2:4','0:5','1:5','2:5'];
 const SALL=[...SW,...SD,...SL];
+
+// 联赛场均进球λ参考
 const LAV={'女亚洲':1.8,'亚冠':2.60,'欧冠':2.90,'英冠':2.75,'意甲':2.65,'西甲':2.70,'德甲':3.05,'法甲':2.55,'英超':2.80,'MLS':2.95};
 const getAvg=l=>{for(const k of Object.keys(LAV))if((l||'').includes(k))return LAV[k];return 2.70};
 
+// ── 数学核心 ──
 // 泊松PMF
 const ppf=(λ,k)=>{if(k<0||λ<=0)return 0;let lp=-λ+k*Math.log(λ);for(let i=1;i<=k;i++)lp-=Math.log(i);return Math.exp(lp)};
+// 泊松CDF P(X<=k)
+const ppcdf=(λ,k)=>{let s=0;for(let i=0;i<=k;i++)s+=ppf(λ,i);return s};
 
-// Dixon-Coles修正函数 ρ修正低比分格
-const dcRho=-0.13; // 标准ρ修正值
+// Dixon-Coles修正（ρ=-0.13标准值，负号修正低比分高估）
+const dcRho=-0.13;
 const dcTau=(i,j,lH,lA,r)=>{
   if(i===0&&j===0)return 1-lH*lA*r;
   if(i===0&&j===1)return 1+lH*r;
@@ -705,7 +726,7 @@ const dcTau=(i,j,lH,lA,r)=>{
   return 1;
 };
 
-// 构建Dixon-Coles修正比分矩阵
+// 构建DC修正比分矩阵（6×6）
 const buildMatrix=(lH,lA)=>{
   const m=[];let tot=0;
   for(let i=0;i<=5;i++){
@@ -713,16 +734,14 @@ const buildMatrix=(lH,lA)=>{
     for(let j=0;j<=5;j++){
       const raw=ppf(lH,i)*ppf(lA,j);
       const tau=(i<=1&&j<=1)?dcTau(i,j,lH,lA,dcRho):1;
-      m[i][j]=raw*tau;
-      tot+=m[i][j];
+      m[i][j]=raw*tau;tot+=m[i][j];
     }
   }
-  // 归一化
   for(let i=0;i<=5;i++)for(let j=0;j<=5;j++)m[i][j]/=tot;
   return m;
 };
 
-// 计算主平客概率
+// 计算主平客概率（8×8精度）
 const calcHDA=(lH,lA)=>{
   let H=0,D=0,A=0;
   for(let i=0;i<=8;i++)for(let j=0;j<=8;j++){
@@ -732,7 +751,7 @@ const calcHDA=(lH,lA)=>{
   const t=H+D+A;return[H/t,D/t,A/t];
 };
 
-// 从真实胜平负赔率去水份→概率→拟合λ
+// 去水份→概率→拟合λ
 const oddsToProb=(h,d,a)=>{const r=[1/h,1/d,1/a],t=r.reduce((s,v)=>s+v,0);return r.map(v=>v/t)};
 const fitLambda=(pH,pD,pA,avg)=>{
   let lH=avg*(0.5+(pH-pA)*0.42),lA=avg-lH;
@@ -745,11 +764,75 @@ const fitLambda=(pH,pD,pA,avg)=>{
   return[+lH.toFixed(3),+lA.toFixed(3)];
 };
 
+// ── 让球概率（泊松精算）──
+// 让球N球：主让N球，调整后主胜=原主净胜>N，平=净胜=N，负=净胜<N
+// N>0主让，N<0客让
+const calcRQHDA=(lH,lA,rq)=>{
+  // rq: 正数=主让(如-1表示主让1球)，负数=客让
+  // 竞彩让球标准：rq=-1表示主队让1球
+  // 让球后 主胜=主净胜球数 > |rq|，平=净胜=|rq|，负=净胜<|rq|（若主让）
+  let W=0,D=0,L=0;
+  const n=Math.abs(rq);
+  const homeGives=rq<0; // 主队让球（rq为负）
+  for(let h=0;h<=9;h++)for(let a=0;a<=9;a++){
+    const p=ppf(lH,h)*ppf(lA,a);
+    const diff=h-a;
+    if(homeGives){
+      // 主让n球：等效主-n vs 客，主净胜>n才算赢
+      if(diff>n)W+=p;
+      else if(diff===n)D+=p;
+      else L+=p;
+    }else{
+      // 客让n球（rq>0）：主+n vs 客，主净胜>-n（即客净胜<n）
+      if(diff+n>0)W+=p;
+      else if(diff+n===0)D+=p;
+      else L+=p;
+    }
+  }
+  const t=W+D+L;return[W/t,D/t,L/t];
+};
+
+// ── 总进球概率（泊松累积）──
+// 8档：0,1,2,3,4,5,6,7+
+const calcTJQ=(lH,lA)=>{
+  const tot=lH+lA;// 合并泊松
+  const res=[];
+  for(let k=0;k<=6;k++)res.push(ppf(tot,k));
+  res.push(1-ppcdf(tot,6));// 7+
+  return res;// 索引0-6=进0-6球，索引7=7+
+};
+
+// ── 半全场概率（泊松矩阵）──
+// 9种：胜胜/胜平/胜负/平胜/平平/平负/负胜/负平/负负
+// 需要半场和全场分别估算λ（半场≈全场的55%左右进球）
+const calcBQC=(lH,lA)=>{
+  const hlH=lH*0.46,hlA=lA*0.46;// 半场进球率约46%
+  const res={};
+  const bqcKeys=['胜胜','胜平','胜负','平胜','平平','平负','负胜','负平','负负'];
+  let tot=0;
+  // 枚举半场比分和全场比分的差值
+  for(let hh=0;hh<=4;hh++)for(let ha=0;ha<=4;ha++){// 半场
+    const ph=ppf(hlH,hh)*ppf(hlA,ha);
+    const hsig=hh>ha?'胜':hh===ha?'平':'负';
+    for(let sh=0;sh<=4;sh++)for(let sa=0;sa<=4;sa++){// 下半场增量
+      const ps=ppf(lH-hlH,sh)*ppf(lA-hlA,sa);
+      const fh=hh+sh,fa=ha+sa;
+      const fsig=fh>fa?'胜':fh===fa?'平':'负';
+      const key=hsig+fsig;
+      res[key]=(res[key]||0)+ph*ps;
+      tot+=ph*ps;
+    }
+  }
+  return bqcKeys.map(k=>({key:k,p:(res[k]||0)/tot}));
+};
+
+// ── UI辅助 ──
 const toType=sc=>{const[h,a]=sc.split(':').map(Number);return h>a?'w':h===a?'d':'l'};
 const typeColor=t=>t==='w'?'var(--green)':t==='d'?'var(--gold)':'var(--red)';
 const typeName=t=>t==='w'?'主胜':t==='d'?'平局':'客胜';
 const evClass=ev=>ev===null?'ev-n':ev>0?'ev-g':ev>-10?'ev-m':'ev-b';
 const evLabel=ev=>ev===null?'无赔率':ev>0?`+${ev.toFixed(1)}%`:`${ev.toFixed(1)}%`;
+const waterRate=(odds)=>(odds.reduce((s,v)=>s+1/v,0)-1)*100;
 
 let scoreMatches=[];
 
@@ -758,30 +841,71 @@ function setSS(msg,color){
   if(el){el.textContent=msg;el.style.color=color||'var(--sub)';}
 }
 
+// ── 数据拉取 ──
 async function scoreFetch(){
   const btn=document.getElementById('score-btn');
   if(btn)btn.disabled=true;
-  setSS('正在拉取…','var(--gold)');
+  setSS('正在拉取全部玩法数据…','var(--gold)');
   try{
     const r=await fetch(PROXY);
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
     const rawCrs=d?.crs?.data||[];
     const rawSpf=d?.spf?.data||[];
-    if(!rawCrs.length)throw new Error('无数据');
-    // 建立matchId→SPF映射
-    const spfMap={};
+    const rawRq=d?.rq?.data||[];
+    const rawTjq=d?.tjq?.data||[];
+    const rawBqc=d?.bqc?.data||[];
+    if(!rawCrs.length&&!rawSpf.length)throw new Error('无数据');
+
+    // matchId映射
+    const spfMap={},rqMap={},tjqMap={},bqcMap={};
     rawSpf.forEach(m=>{
       const h=parseFloat(m.hadH||0),dd=parseFloat(m.hadD||0),a=parseFloat(m.hadA||0);
       if(h>0&&dd>0&&a>0)spfMap[m.matchId]={h,d:dd,a};
     });
-    const ms=rawCrs.map(m=>{
+    rawRq.forEach(m=>{
+      // 让球胜平负赔率字段：rqhadH/rqhadD/rqhadA，让球数：rqNum（负=主让）
+      const h=parseFloat(m.rqhadH||m.hadH||0),dd=parseFloat(m.rqhadD||m.hadD||0),a=parseFloat(m.rqhadA||m.hadA||0);
+      const rq=parseFloat(m.rqNum||m.rqBalls||0);
+      if(h>0&&dd>0&&a>0)rqMap[m.matchId]={h,d:dd,a,rq};
+    });
+    rawTjq.forEach(m=>{
+      // 总进球赔率：tjq0Odds~tjq7Odds
+      const od={};
+      for(let k=0;k<=7;k++){const v=parseFloat(m[`tjq${k}Odds`]||0);if(v>0)od[k]=v;}
+      if(Object.keys(od).length>0)tjqMap[m.matchId]=od;
+    });
+    rawBqc.forEach(m=>{
+      // 半全场：bqc11Odds(胜胜)~bqc00Odds(负负)等
+      const MAP={bqc33Odds:'胜胜',bqc31Odds:'胜平',bqc30Odds:'胜负',bqc13Odds:'平胜',bqc11Odds:'平平',bqc10Odds:'平负',bqc03Odds:'负胜',bqc01Odds:'负平',bqc00Odds:'负负'};
+      const od={};
+      Object.entries(MAP).forEach(([k,label])=>{const v=parseFloat(m[k]||0);if(v>0)od[label]=v;});
+      if(Object.keys(od).length>0)bqcMap[m.matchId]=od;
+    });
+
+    // 以SPF为主构建场次（有SPF才能精算）
+    const baseData=rawSpf.length?rawSpf:rawCrs;
+    const ms=baseData.map(m=>{
       const sc={};
-      Object.entries(CRS).forEach(([k,s])=>{const v=parseFloat(m[k]||0);if(v>0)sc[s]=v});
-      return{id:m.matchNum||'',league:m.leagueName||'',home:m.homeName||'',away:m.guestName||'',time:(m.time||'').slice(0,5),scores:sc,spf:spfMap[m.matchId]||null,cnt:Object.keys(sc).length};
-    }).filter(m=>m.home&&m.away&&m.cnt>0);
+      if(rawCrs.length){
+        const crsM=rawCrs.find(c=>c.matchId===m.matchId);
+        if(crsM)Object.entries(CRS).forEach(([k,s])=>{const v=parseFloat(crsM[k]||0);if(v>0)sc[s]=v});
+      }
+      return{
+        id:m.matchNum||'',league:m.leagueName||'',
+        home:m.homeName||'',away:m.guestName||'',
+        time:(m.time||'').slice(0,5),matchId:m.matchId,
+        scores:sc,
+        spf:spfMap[m.matchId]||null,
+        rq:rqMap[m.matchId]||null,
+        tjq:tjqMap[m.matchId]||null,
+        bqc:bqcMap[m.matchId]||null,
+        cnt:Object.keys(sc).length
+      };
+    }).filter(m=>m.home&&m.away&&(m.spf||m.cnt>0));
+
     if(!ms.length)throw new Error('无有效场次');
-    setSS(`已加载 ${ms.length} 场`,'var(--green)');
+    setSS(`✓ ${ms.length}场 · 比分/让球/总进球/半全场全部加载`,'var(--green)');
     scoreRenderList(ms);
   }catch(e){
     setSS('拉取失败: '+e.message,'var(--red)');
@@ -789,27 +913,47 @@ async function scoreFetch(){
   if(btn)btn.disabled=false;
 }
 
+// 示例数据（含让球/总进球/半全场）
 function scoreDemo(){
-  setSS('示例数据','var(--cyan)');
-  scoreRenderList([
-    {id:'006',league:'西甲',home:'西班牙人',away:'奥维耶多',time:'04:00',spf:{h:1.63,d:3.35,a:4.60},scores:{'1:0':3.90,'2:0':6.50,'2:1':5.80,'3:0':12,'3:1':10,'3:2':18,'4:0':28,'4:1':25,'5:0':60,'0:0':7.50,'1:1':5.20,'2:2':14,'3:3':55,'0:1':11,'0:2':22,'1:2':16,'0:3':50,'1:3':42,'2:3':55},cnt:19},
-    {id:'004',league:'意甲',home:'拉齐奥',away:'萨索洛',time:'03:45',spf:{h:2.09,d:2.90,a:3.27},scores:{'1:0':4.50,'2:0':7.00,'2:1':5.50,'3:0':13,'3:1':11,'3:2':19,'4:0':30,'4:1':27,'5:0':65,'0:0':7.00,'1:1':4.80,'2:2':13,'3:3':52,'0:1':9.50,'0:2':18,'1:2':14,'0:3':40,'1:3':36,'2:3':48},cnt:19}
-  ]);
+  setSS('示例数据（马竞vs热刺）','var(--cyan)');
+  scoreRenderList([{
+    id:'008',league:'欧冠',home:'马德里竞技',away:'热刺',time:'04:00',matchId:'demo1',
+    spf:{h:1.49,d:3.85,a:5.05},
+    rq:{h:1.72,d:3.50,a:3.90,rq:-1},// 主让1球
+    tjq:{0:16,1:6.5,2:4.2,3:4.8,4:9,5:16,6:28,7:55},
+    bqc:{胜胜:2.8,胜平:7.5,胜负:18,平胜:12,平平:5.5,平负:4.2,负胜:22,负平:8.5,负负:3.8},
+    scores:{'1:0':4.80,'2:0':8.0,'2:1':6.2,'3:0':14,'3:1':11,'3:2':19,'4:0':30,'4:1':26,'4:2':36,'5:0':60,'5:1':50,'5:2':70,'0:0':12,'1:1':5.8,'2:2':15,'3:3':55,'0:1':14,'0:2':28,'1:2':18,'0:3':55,'1:3':44,'2:3':55,'0:4':90,'1:4':75,'2:4':95,'0:5':120,'1:5':100,'2:5':130},
+    cnt:28
+  },{
+    id:'006',league:'西甲',home:'巴萨',away:'皇马',time:'04:00',matchId:'demo2',
+    spf:{h:2.30,d:3.30,a:2.80},
+    rq:{h:2.55,d:3.35,a:2.50,rq:0},// 平手
+    tjq:{0:12,1:5.8,2:3.8,3:4.5,4:8.5,5:16,6:28,7:55},
+    bqc:{胜胜:4.5,胜平:9.5,胜负:14,平胜:8.5,平平:5.2,平负:5.8,负胜:9.5,负平:8.5,负负:5.5},
+    scores:{'1:0':6.5,'2:0':10,'2:1':7.5,'3:0':18,'3:1':14,'3:2':22,'4:0':36,'4:1':30,'4:2':42,'5:0':75,'5:1':60,'5:2':85,'0:0':9.5,'1:1':5.5,'2:2':14,'3:3':52,'0:1':7.5,'0:2':14,'1:2':10,'0:3':22,'1:3':18,'2:3':26,'0:4':45,'1:4':38,'2:4':52,'0:5':90,'1:5':75,'2:5':100},
+    cnt:28
+  }]);
 }
 
 function scoreRenderList(ms){
   scoreMatches=ms;
   const el=document.getElementById('score-mlist');
-  el.innerHTML=ms.map((m,i)=>`
-    <div onclick="scoreSelect(${i})" id="smi${i}" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap;transition:all .2s">
+  el.innerHTML=ms.map((m,i)=>{
+    const tags=[];
+    if(m.spf)tags.push(`<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.2)">SPF</span>`);
+    if(m.rq)tags.push(`<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(56,182,255,.1);color:var(--blue);border:1px solid rgba(56,182,255,.2)">让球</span>`);
+    if(m.tjq)tags.push(`<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)">总进球</span>`);
+    if(m.bqc)tags.push(`<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,200,55,.1);color:var(--gold);border:1px solid rgba(255,200,55,.2)">半全场</span>`);
+    if(m.cnt>0)tags.push(`<span style="font-size:9px;font-family:var(--mono);color:var(--green)">✓${m.cnt}分</span>`);
+    return`<div onclick="scoreSelect(${i})" id="smi${i}" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;flex-wrap:wrap;transition:all .2s">
       <span style="font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.2);font-family:var(--mono)">${m.league}</span>
       <span style="font-size:14px;font-weight:500;flex:1">${m.home} <span style="color:var(--sub)">vs</span> ${m.away}</span>
       <span style="font-size:10px;color:var(--sub);font-family:var(--mono)">${m.time}</span>
-      <span style="font-size:11px">${m.spf?`<span style="color:var(--green)">${m.spf.h}</span>/<span style="color:var(--gold)">${m.spf.d}</span>/<span style="color:var(--red)">${m.spf.a}</span>`:'<span style="color:var(--red)">无胜平负</span>'}</span>
-      <span style="font-size:9px;font-family:var(--mono);color:${m.cnt>0?'var(--green)':'var(--sub)'}">✓${m.cnt}种比分</span>
-    </div>`).join('');
-  el.style.display='flex';
-  el.style.flexDirection='column';
+      ${m.spf?`<span style="font-size:11px"><span style="color:var(--green)">${m.spf.h}</span>/<span style="color:var(--gold)">${m.spf.d}</span>/<span style="color:var(--red)">${m.spf.a}</span></span>`:'<span style="font-size:10px;color:var(--red)">无SPF</span>'}
+      ${tags.join('')}
+    </div>`;
+  }).join('');
+  el.style.display='flex';el.style.flexDirection='column';
   document.getElementById('score-result').innerHTML='';
 }
 
@@ -819,24 +963,20 @@ function scoreSelect(idx){
     e.style.background=i===idx?'rgba(0,229,160,.04)':'var(--card)';
   });
   const m=scoreMatches[idx];
-
-  // 检查真实赔率
-  if(!m.spf||!m.spf.h){
-    document.getElementById('score-result').innerHTML=`
-      <div style="background:rgba(255,61,90,.04);border:1px solid rgba(255,61,90,.2);border-radius:8px;padding:14px;font-size:12px;line-height:1.8">
-        ⛔ <b style="color:var(--red)">${m.home} vs ${m.away}</b> — 无真实胜平负赔率，遵守红线准则，不做EV计算。
-      </div>`;
+  if(!m.spf){
+    document.getElementById('score-result').innerHTML=`<div style="background:rgba(255,61,90,.04);border:1px solid rgba(255,61,90,.2);border-radius:8px;padding:14px;font-size:12px;line-height:1.8">⛔ <b style="color:var(--red)">${m.home} vs ${m.away}</b> — 无真实胜平负赔率，严守红线，不做EV计算。</div>`;
     return;
   }
 
-  // 计算
+  // ── 核心计算 ──
   const[pH,pD,pA]=oddsToProb(m.spf.h,m.spf.d,m.spf.a);
   const avg=getAvg(m.league);
   const[lH,lA]=fitLambda(pH,pD,pA,avg);
   const mat=buildMatrix(lH,lA);
   const[vH,vD,vA]=calcHDA(lH,lA);
+  const wr=waterRate([m.spf.h,m.spf.d,m.spf.a]);
 
-  // 找最高概率比分
+  // 比分精算
   let maxP=0,maxSc='1:0';
   const em={};
   SALL.forEach(sc=>{
@@ -846,30 +986,126 @@ function scoreSelect(idx){
     const od=m.scores[sc]||0;
     em[sc]={p,od,ev:od>0?(p*od-1)*100:null};
   });
-
-  // EV排名
   const ranked=SALL.filter(sc=>em[sc].ev!==null).sort((a,b)=>em[b].ev-em[a].ev);
-
-  // 其他比分概率
   let covP=0;SALL.forEach(sc=>{const[hg,ag2]=sc.split(':').map(Number);if(hg<=5&&ag2<=5)covP+=mat[hg][ag2]});
   const otherP=(1-covP)*100;
 
+  // 让球精算
+  let rqHtml='';
+  if(m.rq){
+    const{h:rh,d:rd,a:ra,rq}=m.rq;
+    const[rW,rD,rL]=calcRQHDA(lH,lA,rq);
+    const rqLabel=rq===0?'平手':rq<0?`主让${Math.abs(rq)}球`:`客让${rq}球`;
+    const rwEV=rh>0?(rW*rh-1)*100:null;
+    const rdEV=rd>0?(rD*rd-1)*100:null;
+    const rlEV=ra>0?(rL*ra-1)*100:null;
+    const rqWater=rh>0&&rd>0&&ra>0?waterRate([rh,rd,ra]):null;
+    rqHtml=`
+    <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+      <span style="font-size:13px;font-weight:700;color:var(--blue)">让球胜平负精算</span>
+      <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(56,182,255,.1);color:var(--blue);border:1px solid rgba(56,182,255,.2);font-family:var(--mono)">${rqLabel}</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(56,182,255,.2);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--sub);margin-bottom:8px;font-family:var(--mono)">竞彩让球赔率：让胜 <b style="color:var(--green)">${rh}</b> / 让平 <b style="color:var(--gold)">${rd}</b> / 让负 <b style="color:var(--red)">${ra}</b>${rqWater!==null?` · 水位 <b style="color:var(--gold)">${rqWater.toFixed(1)}%</b>`:''}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        ${[['让胜',rW,rh,rwEV,'var(--green)'],['让平',rD,rd,rdEV,'var(--gold)'],['让负',rL,ra,rlEV,'var(--red)']].map(([label,prob,odd,ev,c])=>`
+        <div style="background:var(--bg3);border:1px solid ${ev!==null&&ev>-5?'rgba(0,229,160,.4)':ev!==null&&ev>-12?'rgba(255,200,55,.3)':'var(--border)'};border-radius:7px;padding:9px 10px;text-align:center">
+          <div style="font-size:10px;color:var(--sub);font-family:var(--mono);margin-bottom:3px">${label}</div>
+          <div style="font-size:18px;font-weight:700;color:${c}">${(prob*100).toFixed(1)}%</div>
+          <div style="font-size:10px;color:var(--sub);font-family:var(--mono)">泊松理论</div>
+          ${odd>0?`<div style="font-size:13px;font-weight:700;color:var(--cyan)">@${odd}</div><div style="font-size:11px;font-weight:700;font-family:var(--mono)" class="${evClass(ev)}">${evLabel(ev)}</div>`:'<div style="font-size:10px;color:var(--sub)">无赔率⛔</div>'}
+        </div>`).join('')}
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:var(--sub);line-height:1.7;font-family:var(--mono)">💡 让球概率基于泊松矩阵精算，准确度高于简单胜平负转换。让球后赔率去水份更低时说明庄家定价相对公允。</div>
+    </div>`;
+  } else {
+    rqHtml=`<div class="tbl-note" style="margin:10px 0">让球胜平负：<span style="color:var(--sub)">⛔ 本场无让球赔率数据，不做EV计算</span></div>`;
+  }
+
+  // 总进球精算
+  let tjqHtml='';
+  if(m.tjq){
+    const tjqProbs=calcTJQ(lH,lA);
+    const tjqLabels=['0球','1球','2球','3球','4球','5球','6球','7+球'];
+    const tjqWater=Object.keys(m.tjq).length>=4?waterRate(Object.values(m.tjq)):null;
+    const tjqEvs=tjqLabels.map((label,k)=>{
+      const p=tjqProbs[k];
+      const od=m.tjq[k]||0;
+      const ev=od>0?(p*od-1)*100:null;
+      return{label,p,od,ev};
+    });
+    const tjqRanked=[...tjqEvs].filter(x=>x.ev!==null).sort((a,b)=>b.ev-a.ev);
+    tjqHtml=`
+    <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+      <span style="font-size:13px;font-weight:700;color:var(--purple)">总进球数精算</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--sub);margin-bottom:8px;font-family:var(--mono)">λ合计=${(lH+lA).toFixed(3)} · 泊松分布直接算各档概率${tjqWater!==null?` · 总进球水位 ${tjqWater.toFixed(1)}%`:''}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">
+        ${tjqEvs.map(({label,p,od,ev})=>`
+        <div style="background:var(--bg3);border:1px solid ${ev!==null&&ev>-5?'rgba(0,229,160,.4)':ev!==null&&ev>-12?'rgba(255,200,55,.3)':'var(--border)'};border-radius:6px;padding:7px 8px;text-align:center">
+          <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:2px">${label}</div>
+          <div style="font-size:15px;font-weight:700;color:var(--text)">${(p*100).toFixed(1)}%</div>
+          ${od>0?`<div style="font-size:12px;font-weight:700;color:var(--cyan)">@${od}</div><div style="font-size:10px;font-weight:700;font-family:var(--mono)" class="${evClass(ev)}">${evLabel(ev)}</div>`:'<div style="font-size:9px;color:var(--sub)">无赔率</div>'}
+        </div>`).join('')}
+      </div>
+      ${tjqRanked.length?`<div style="font-size:10px;color:var(--or);font-family:var(--mono);margin-bottom:5px">★ EV最优：${tjqRanked[0].label} @${tjqRanked[0].od} → <span class="${evClass(tjqRanked[0].ev)}">${evLabel(tjqRanked[0].ev)}</span>${tjqRanked[1]?` · 次优：${tjqRanked[1].label} → <span class="${evClass(tjqRanked[1].ev)}">${evLabel(tjqRanked[1].ev)}</span>`:''}</div>`:''}
+      <div style="font-size:10px;color:var(--sub);line-height:1.7;font-family:var(--mono)">💡 Over2.5理论概率=${((1-tjqProbs[0]-tjqProbs[1]-tjqProbs[2])*100).toFixed(1)}% · Under2.5=${((tjqProbs[0]+tjqProbs[1]+tjqProbs[2])*100).toFixed(1)}% · BTTS≈${((1-ppcdf(lH,0))*(1-ppcdf(lA,0))*100).toFixed(1)}%</div>
+    </div>`;
+  } else {
+    tjqHtml=`<div class="tbl-note" style="margin:10px 0">总进球：<span style="color:var(--sub)">⛔ 本场无总进球赔率数据，不做EV计算</span></div>`;
+  }
+
+  // 半全场精算
+  let bqcHtml='';
+  if(m.bqc){
+    const bqcProbs=calcBQC(lH,lA);
+    const bqcEvs=bqcProbs.map(({key,p})=>{
+      const od=m.bqc[key]||0;
+      const ev=od>0?(p*od-1)*100:null;
+      return{key,p,od,ev};
+    });
+    const bqcRanked=[...bqcEvs].filter(x=>x.ev!==null).sort((a,b)=>b.ev-a.ev);
+    const bqcWater=Object.keys(m.bqc).length>=6?waterRate(Object.values(m.bqc).filter(v=>v>0)):null;
+    const bqcColor=k=>{if(k[0]==='胜')return'var(--green)';if(k[0]==='平')return'var(--gold)';return'var(--red)'};
+    bqcHtml=`
+    <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+      <span style="font-size:13px;font-weight:700;color:var(--gold)">半全场胜平负精算</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(255,200,55,.2);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--sub);margin-bottom:8px;font-family:var(--mono)">半场λ主=${(lH*0.46).toFixed(2)} · λ客=${(lA*0.46).toFixed(2)}（全场46%）${bqcWater!==null?` · 半全场水位 ${bqcWater.toFixed(1)}%`:''}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px">
+        ${bqcEvs.map(({key,p,od,ev})=>`
+        <div style="background:var(--bg3);border:1px solid ${ev!==null&&ev>-5?'rgba(0,229,160,.4)':ev!==null&&ev>-12?'rgba(255,200,55,.3)':'var(--border)'};border-radius:6px;padding:7px 8px;text-align:center">
+          <div style="font-size:11px;font-weight:700;color:${bqcColor(key)};margin-bottom:2px">${key}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${(p*100).toFixed(1)}%</div>
+          ${od>0?`<div style="font-size:12px;font-weight:700;color:var(--cyan)">@${od}</div><div style="font-size:10px;font-weight:700;font-family:var(--mono)" class="${evClass(ev)}">${evLabel(ev)}</div>`:'<div style="font-size:9px;color:var(--sub)">无赔率</div>'}
+        </div>`).join('')}
+      </div>
+      ${bqcRanked.length?`<div style="font-size:10px;color:var(--or);font-family:var(--mono)">★ EV最优：${bqcRanked[0].key} @${bqcRanked[0].od} → <span class="${evClass(bqcRanked[0].ev)}">${evLabel(bqcRanked[0].ev)}</span>${bqcRanked[1]?` · 次优：${bqcRanked[1].key} → <span class="${evClass(bqcRanked[1].ev)}">${evLabel(bqcRanked[1].ev)}</span>`:''}</div>`:''}
+      <div style="margin-top:8px;font-size:10px;color:var(--sub);line-height:1.7;font-family:var(--mono)">💡 半全场奖金高但命中率低，胜胜/负负对角线概率最高，适合小额炒冷门。注意半全场最高4场串关。</div>
+    </div>`;
+  } else {
+    bqcHtml=`<div class="tbl-note" style="margin:10px 0">半全场：<span style="color:var(--sub)">⛔ 本场无半全场赔率数据，不做EV计算</span></div>`;
+  }
+
+  // ── 渲染 ──
   document.getElementById('score-result').innerHTML=`
-    <!-- 标题 -->
     <div style="background:linear-gradient(135deg,rgba(167,139,250,.07),rgba(56,182,255,.05));border:1px solid rgba(167,139,250,.18);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span style="font-size:20px;font-weight:700">${m.home} <span style="color:var(--sub);font-size:15px">vs</span> ${m.away}</span>
       <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)">${m.league}</span>
-      <span style="margin-left:auto;font-size:10px;color:var(--sub);font-family:var(--mono)">λ主=${lH} · λ客=${lA} · DC修正ρ=${dcRho}</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--sub);font-family:var(--mono)">λ主=${lH} · λ客=${lA} · DC ρ=${dcRho} · 水位${wr.toFixed(1)}%</span>
     </div>
 
-    <!-- 赔率来源说明 -->
-    <div class="tbl-note" style="margin-bottom:8px">
-      <b style="color:var(--cyan)">真实竞彩赔率</b>：胜 <b style="color:var(--green)">${m.spf.h}</b> / 平 <b style="color:var(--gold)">${m.spf.d}</b> / 负 <b style="color:var(--red)">${m.spf.a}</b>
-      → 去水份概率：主胜 ${(pH*100).toFixed(1)}% / 平 ${(pD*100).toFixed(1)}% / 客胜 ${(pA*100).toFixed(1)}%
+    <div class="tbl-note" style="margin-bottom:10px">
+      <b style="color:var(--cyan)">真实竞彩胜平负赔率</b>：胜 <b style="color:var(--green)">${m.spf.h}</b> / 平 <b style="color:var(--gold)">${m.spf.d}</b> / 负 <b style="color:var(--red)">${m.spf.a}</b>
+      → 去水份：主胜 ${(pH*100).toFixed(1)}% / 平 ${(pD*100).toFixed(1)}% / 客胜 ${(pA*100).toFixed(1)}% · 庄家水位 <b style="color:var(--gold)">${wr.toFixed(1)}%</b>
     </div>
 
-    <!-- 概率总览 -->
-    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
       ${[['主胜','var(--green)',vH],['平局','var(--gold)',vD],['客胜','var(--red)',vA]].map(([l,c,v])=>`
         <div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;text-align:center;flex:1;min-width:70px">
           <div style="font-size:9px;color:var(--sub);font-family:var(--mono);margin-bottom:2px">${l}</div>
@@ -886,13 +1122,15 @@ function scoreSelect(idx){
       </div>
     </div>
 
-    <!-- TOP5 EV -->
-    ${ranked.length?`
-    <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
-      <span style="font-size:13px;font-weight:700;color:#fff">★ EV TOP5</span>
+    ${rqHtml}
+    ${tjqHtml}
+    ${bqcHtml}
+
+    <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+      <span style="font-size:13px;font-weight:700;color:#fff">★ 比分EV TOP5</span>
       <div style="flex:1;height:1px;background:var(--border2)"></div>
     </div>
-    <div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+    ${ranked.length?`<div style="background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px">
       <div style="font-size:10px;color:var(--or);letter-spacing:1.5px;margin-bottom:10px;font-family:var(--mono)">TOP5 · 竞彩官方比分赔率 · Dixon-Coles修正概率</div>
       ${ranked.slice(0,5).map((sc,i)=>{const{p,od,ev}=em[sc];const t=toType(sc);const g=['var(--gold)','#c0c0c0','#cd7f32','var(--sub)','var(--sub)'][i];return`
         <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:4px">
@@ -901,14 +1139,13 @@ function scoreSelect(idx){
           <span style="flex:1;font-size:11px;color:var(--sub2)">P:${(p*100).toFixed(2)}% · @${od} · ${typeName(t)}</span>
           <span style="font-size:12px;font-weight:700;font-family:var(--mono)" class="${evClass(ev)}">${evLabel(ev)}</span>
         </div>`}).join('')}
-    </div>`:''}
+    </div>`:'<div class="tbl-note">无比分赔率数据</div>'}
 
-    <!-- EV全览 -->
     <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
-      <span style="font-size:13px;font-weight:700;color:#fff">EV 全览</span>
+      <span style="font-size:13px;font-weight:700;color:#fff">比分EV全览</span>
       <div style="flex:1;height:1px;background:var(--border2)"></div>
     </div>
-    ${[['▶ 主胜',SW,'w'],['▶ 平局',SD,'d'],['▶ 客胜',SL,'l']].map(([tt,scs,tp])=>`
+    ${[['▶ 主胜比分',SW,'w'],['▶ 平局比分',SD,'d'],['▶ 客胜比分',SL,'l']].map(([tt,scs,tp])=>`
       <div style="font-size:10px;color:var(--sub2);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);font-family:var(--mono)">${tt}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:5px;margin-bottom:12px">
         ${scs.map(sc=>{const{p,od,ev}=em[sc];const best=ev!==null&&ev>-5,good=ev!==null&&ev>-12;return`
@@ -919,15 +1156,14 @@ function scoreSelect(idx){
           </div>`}).join('')}
       </div>`).join('')}
 
-    <!-- 泊松矩阵 -->
     <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
       <span style="font-size:13px;font-weight:700;color:#fff">Dixon-Coles 概率矩阵</span>
       <div style="flex:1;height:1px;background:var(--border2)"></div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin-bottom:10px">
-      <div style="font-size:10px;color:var(--purple);letter-spacing:1.2px;margin-bottom:8px;font-family:var(--mono)">6×6矩阵 · 行=主队进球 · 列=客队进球 · DC修正低比分</div>
+      <div style="font-size:10px;color:var(--purple);letter-spacing:1.2px;margin-bottom:8px;font-family:var(--mono)">6×6矩阵 · 行=主队进球 · 列=客队进球 · DC修正ρ=${dcRho}</div>
       <table style="border-collapse:collapse;min-width:360px;font-size:11px">
-        <tr><th style="background:var(--bg3);padding:5px 6px;text-align:center;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:var(--mono)">${m.home}↓/${m.away}→</th>
+        <tr><th style="background:var(--bg3);padding:5px 6px;text-align:center;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:var(--mono)">${m.home}↓/客→</th>
           ${[0,1,2,3,4,5].map(j=>`<th style="background:var(--bg3);padding:5px 6px;text-align:center;color:var(--sub);font-size:9px;border:1px solid var(--border);font-family:var(--mono)">客${j}</th>`).join('')}
         </tr>
         ${[0,1,2,3,4,5].map(i=>`
@@ -945,7 +1181,7 @@ function scoreSelect(idx){
           </tr>`).join('')}
       </table>
     </div>
-    <div class="tbl-note">⚠ <b style="color:var(--gold)">其他比分概率=${otherP.toFixed(1)}%</b> 不在竞彩22种范围内，实际命中率低，建议小额辅助配合。</div>
+    <div class="tbl-note">⚠ 其他比分概率 <b style="color:var(--gold)">${otherP.toFixed(1)}%</b> · Over2.5理论 <b>${((1-ppcdf(lH+lA,2))*100).toFixed(1)}%</b> · BTTS <b>${((1-ppcdf(lH,0))*(1-ppcdf(lA,0))*100).toFixed(1)}%</b></div>
   `;
 }
 </script>
