@@ -1689,22 +1689,27 @@ function autoSelectAndRun(){
     document.getElementById('mc-result').innerHTML='<div style="color:var(--red);font-size:12px;padding:8px">⚠ 请先在精算引擎Tab拉取数据</div>';
     return;
   }
+  // 直接计算每场最优方向，不依赖DOM
+  const selected=[];
   mcPool.forEach((m,i)=>{
-    // 确保不跳过任何场次
-    document.querySelectorAll('[id="mc-skip-'+i+'"]').forEach(el=>el.checked=false);
-
-    // 找EV最优方向
     let bestJ=0,bestEV=-99;
     m.options.forEach((o,j)=>{
       const ev=o.prob*o.odds-1;
       if(ev>bestEV){bestEV=ev;bestJ=j;}
     });
-    // 全负EV则选概率最高方向
     if(bestEV<-0.15){
       let bestProb=0;
       m.options.forEach((o,j)=>{if(o.prob>bestProb){bestProb=o.prob;bestJ=j;}});
     }
-    // 直接设置radio checked（不依赖DOM查找，直接操作mcPool对应的input）
+    const opt=m.options[bestJ];
+    const dirMap={'主胜':'W','平局':'D','客胜':'L'};
+    selected.push({
+      label:m.label,
+      dir:opt.dir,odds:opt.odds,prob:opt.prob,
+      winResult:dirMap[opt.dir],
+      lH:m.lH,lA:m.lA
+    });
+    // 同步UI显示选中状态
     const container=document.getElementById('mc-picks');
     if(container){
       const radios=container.querySelectorAll('input[name="mc-pick-'+i+'"]');
@@ -1712,9 +1717,10 @@ function autoSelectAndRun(){
       mcHighlight(i,bestJ);
     }
   });
-  // 稍微延迟确保DOM更新后再模拟
-  setTimeout(runMonteCarlo,50);
+  // 直接用selected数组跑模拟，跳过DOM读取
+  runMonteCarloWithData(selected);
 }
+
 
 function runMonteCarlo(){
   // 收集用户选择
@@ -1741,7 +1747,14 @@ function runMonteCarlo(){
     document.getElementById('mc-result').innerHTML=`<div style="color:var(--red);font-size:12px;padding:8px">⚠ 请至少选择2场并指定投注方向</div>`;
     return;
   }
+  runMonteCarloWithData(selected);
+}
 
+function runMonteCarloWithData(selected){
+  if(selected.length<2){
+    document.getElementById('mc-result').innerHTML=`<div style="color:var(--red);font-size:12px;padding:8px">⚠ 请至少选择2场并指定投注方向</div>`;
+    return;
+  }
   const N=10000;
   const result=document.getElementById('mc-result');
   result.innerHTML=`<div style="color:var(--gold);font-size:12px;padding:8px;font-family:var(--mono)">⏳ 正在模拟${N.toLocaleString()}次…</div>`;
