@@ -195,18 +195,18 @@ tr:hover td{background:rgba(255,106,0,.02)}
 <div class="topnav">
   <div class="nav-logo"><div class="live-dot"></div>JINGCAI PRO <span style="font-size:10px;color:var(--sub);font-weight:400;letter-spacing:1px;margin-left:4px">v11</span></div>
   <div class="nav-stats">
-    <div class="ns-item"><span class="ns-v">5</span><span class="ns-l">场次</span></div>
+    <div class="ns-item"><span class="ns-v" id="nav-cnt">—</span><span class="ns-l">场次</span></div>
     <div class="ns-sep"></div>
-    <div class="ns-item"><span class="ns-v" style="color:var(--green)">2</span><span class="ns-l">SR精算</span></div>
+    <div class="ns-item"><span class="ns-v" id="nav-ev-cnt" style="color:var(--green)">—</span><span class="ns-l">模型精算</span></div>
     <div class="ns-sep"></div>
-    <div class="ns-item"><span class="ns-v" style="color:var(--gold)">★006</span><span class="ns-l">最优</span></div>
+    <div class="ns-item"><span class="ns-v" id="nav-best-id" style="color:var(--gold)">—</span><span class="ns-l">最优</span></div>
     <div class="ns-sep"></div>
-    <div class="ns-item"><span class="ns-v" style="color:var(--gold)">−2.5%</span><span class="ns-l">最优EV</span></div>
+    <div class="ns-item"><span class="ns-v" id="nav-best-ev" style="color:var(--gold)">—</span><span class="ns-l">最优EV</span></div>
   </div>
   <div class="nav-right">
-    <span class="nchip nc-g">SR实时</span>
+    <span class="nchip nc-g">竞彩直连</span>
     <span class="nchip nc-o">Poisson+DC</span>
-    <div class="nav-date">2026·03·09</div>
+    <div class="nav-date" id="nav-date">加载中</div>
   </div>
 </div>
 
@@ -251,175 +251,42 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
   <!-- 场次EV筛选表 -->
 
-  <div class="sec"><div class="sec-num">①</div><div class="sec-title">全量场次 EV筛选</div><div class="sec-sub">5场全部列出 · SR场次精算EV · 无数据明确标注</div><div class="sec-line"></div></div>
+  <div class="sec"><div class="sec-num">①</div><div class="sec-title">全量场次 EV筛选</div><div class="sec-sub" id="ov-sec1-sub">正在加载…</div><div class="sec-line"></div></div>
   <div class="tbl-wrap">
     <table class="detail-table">
       <thead><tr><th style="width:36px">#</th><th class="tl">对阵</th><th>联赛</th><th>时间</th><th>最优EV</th><th>来源</th></tr></thead>
-      <tbody>
-        <tr><td><b>003</b></td><td class="tl">西汉姆联 vs 布伦特福德</td><td>英足总杯</td><td style="font-family:var(--mono);font-size:10px">03:30</td><td><span style="color:var(--sub)">无数据</span></td><td><span class="src-tag src-no">—</span></td></tr>
-        <tr style="background:rgba(255,106,0,.025)"><td><b>004</b></td><td class="tl">拉齐奥 vs 萨索洛</td><td>意甲</td><td style="font-family:var(--mono);font-size:10px">03:45</td><td><span class="ev-m">客胜 −7.8%</span></td><td><span class="src-tag src-sr">SR</span></td></tr>
-        <tr><td><b>005</b></td><td class="tl">敦刻尔克 vs 兰斯</td><td>法乙</td><td style="font-family:var(--mono);font-size:10px">03:45</td><td><span style="color:var(--sub)">无数据</span></td><td><span class="src-tag src-no">—</span></td></tr>
-        <tr style="background:rgba(0,229,160,.025)"><td><b>006</b></td><td class="tl"><b>西班牙人 vs 奥维耶多</b></td><td>西甲</td><td style="font-family:var(--mono);font-size:10px">04:00</td><td><b class="ev-m">★ 客胜 −2.5%</b></td><td><span class="src-tag src-sr">SR</span></td></tr>
-        <tr><td><b>007</b></td><td class="tl">通德拉 vs 里奥阿维</td><td>葡超</td><td style="font-family:var(--mono);font-size:10px">04:15</td><td><span style="color:var(--sub)">无数据</span></td><td><span class="src-tag src-no">—</span></td></tr>
+      <tbody id="ov-tbody">
+        <tr><td colspan="6" style="text-align:center;color:var(--sub);padding:16px;font-family:var(--mono);font-size:11px">⏳ 正在拉取今日竞彩数据…</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="tbl-note">📌 今日5场，SR覆盖2场（004意甲·006西甲）。<b style="color:var(--cyan)">006客胜奥维耶多 −2.5%</b> 为今日全场最优单项。003英足总杯·005法乙·007葡超无SR概率，不做EV推荐。<b style="color:var(--red)">今日无正期望场次。</b></div>
+  <div class="tbl-note" id="ov-note">📌 正在加载今日场次数据…</div>
 
-  <!-- SR场次详细概率 -->
+  <!-- 场次详细概率（动态） -->
 
-  <div class="sec" style="margin-top:22px"><div class="sec-num">②</div><div class="sec-title">SR精算场次详情</div><div class="sec-sub">胜平负概率 · xG分析 · 赔率EV</div><div class="sec-line"></div></div>
+  <div class="sec" style="margin-top:22px"><div class="sec-num">②</div><div class="sec-title">精算场次详情</div><div class="sec-sub">胜平负概率 · 泊松+DC模型 · 赔率EV</div><div class="sec-line"></div></div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:14px">
-
-<!-- 006 -->
-<div class="card grade-A" style="margin-bottom:0;border-color:rgba(34,211,238,.2)">
-  <div class="card-inner"><div class="cbar"></div><div class="cbody">
-    <div class="card-head">
-      <div class="card-left">
-        <span class="mnum">#006</span>
-        <span class="lbadge lb-w">西甲</span>
-        <span class="mname">西班牙人 vs 奥维耶多</span>
-        <span style="font-size:10px;background:rgba(34,211,238,.12);color:var(--cyan);border:1px solid rgba(34,211,238,.25);padding:2px 8px;border-radius:3px;font-family:var(--mono)">★ 今日最优</span>
-      </div>
-      <div class="card-right"><span class="ev-tag ev-near">−2.5%</span><span class="src-tag src-sr">SR</span></div>
-    </div>
-    <div class="prob-row">
-      <div class="prob-col">
-        <div class="prob-lbl">主胜 西班牙人</div>
-        <div class="prob-bar-wrap"><div class="prob-bar pb-w" style="width:51.2%"></div></div>
-        <div class="prob-pct pp-w">51.2%</div>
-        <div class="prob-odd">@1.63 · EV <span class="ev-b">−16.5%</span></div>
-      </div>
-      <div class="prob-col">
-        <div class="prob-lbl">平局</div>
-        <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:27.6%"></div></div>
-        <div class="prob-pct pp-d">27.6%</div>
-        <div class="prob-odd">@3.35 · EV <span class="ev-m">−7.5%</span></div>
-      </div>
-      <div class="prob-col">
-        <div class="prob-lbl">客胜 奥维耶多</div>
-        <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:21.2%"></div></div>
-        <div class="prob-pct pp-l">21.2%</div>
-        <div class="prob-odd">@4.60 · EV <b class="ev-m">−2.5%★</b></div>
-      </div>
-    </div>
-    <div style="background:rgba(255,200,55,.06);border:1px solid rgba(255,200,55,.15);border-radius:7px;padding:8px 12px;font-size:11px;color:var(--sub2);line-height:1.7">
-      xG：西班牙人 1.42进/1.18失 <b style="color:var(--green)">差+0.24</b> · 奥维耶多 0.68进/1.65失 <b style="color:var(--red)">差−0.97</b><br>
-      xG支持主胜但赔率1.63已充分定价(EV−16.5%)。奥维耶多防守极弱，客胜−2.5%为今日最优，低命中率博高赔率。
-    </div>
-  </div></div>
-</div>
-
-<!-- 004 -->
-<div class="card grade-B" style="margin-bottom:0">
-  <div class="card-inner"><div class="cbar"></div><div class="cbody">
-    <div class="card-head">
-      <div class="card-left">
-        <span class="mnum">#004</span>
-        <span class="lbadge lb-i">意甲</span>
-        <span class="mname">拉齐奥 vs 萨索洛</span>
-      </div>
-      <div class="card-right"><span class="ev-tag ev-near">−7.8%</span><span class="src-tag src-sr">SR</span></div>
-    </div>
-    <div class="prob-row">
-      <div class="prob-col">
-        <div class="prob-lbl">主胜 拉齐奥</div>
-        <div class="prob-bar-wrap"><div class="prob-bar pb-w" style="width:41.5%"></div></div>
-        <div class="prob-pct pp-w">41.5%</div>
-        <div class="prob-odd">@2.09 · EV <span class="ev-b">−13.3%</span></div>
-      </div>
-      <div class="prob-col">
-        <div class="prob-lbl">平局</div>
-        <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:30.3%"></div></div>
-        <div class="prob-pct pp-d">30.3%</div>
-        <div class="prob-odd">@2.90 · EV <span class="ev-b">−12.1%</span></div>
-      </div>
-      <div class="prob-col">
-        <div class="prob-lbl">客胜 萨索洛</div>
-        <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:28.2%"></div></div>
-        <div class="prob-pct pp-l">28.2%</div>
-        <div class="prob-odd">@3.27 · EV <b class="ev-m">−7.8%★</b></div>
-      </div>
-    </div>
-    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.12);border-radius:7px;padding:8px 12px;font-size:11px;color:var(--sub2);line-height:1.7">
-      xG：拉齐奥 1.55进/1.10失 <b style="color:var(--green)">差+0.45</b> · 萨索洛 0.82进/1.58失 <b style="color:var(--red)">差−0.76</b><br>
-      SR客胜概率28.2% > 赔率隐含23.9%，庄家低估萨索洛，客胜EV −7.8%为本场最优。
-    </div>
-  </div></div>
-</div>
-
+  <div id="ov-sr-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:14px">
+    <div style="text-align:center;color:var(--sub);padding:20px;font-size:12px;font-family:var(--mono)">⏳ 正在加载…</div>
   </div>
 
-  <!-- 串关方案（融合进来） -->
+  <!-- 串关方案（动态） -->
 
-  <div class="sec" style="margin-top:22px"><div class="sec-num">③</div><div class="sec-title">串关方案 / 投注参考</div><div class="sec-sub">仅SR场次（004×006）· 二串一 · 凯利参考</div><div class="sec-line"></div></div>
+  <div class="sec" style="margin-top:22px"><div class="sec-num">③</div><div class="sec-title">串关方案 / 投注参考</div><div class="sec-sub" id="ov-sec3-sub">二串一 · 凯利参考</div><div class="sec-line"></div></div>
+  <div id="ov-parlay"><div class="tbl-note">⏳ 正在加载…</div></div>
 
-  <div class="tbl-note" style="margin-bottom:12px">⚠️ 今日无正期望场次，凯利公式建议投注比例均为0。以下串关为EV相对最优组合，若参与请严格控制金额。</div>
+  <!-- 赔率全览表（动态） -->
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;margin-bottom:10px">
-
-<div class="parlay-card" style="border-color:rgba(34,211,238,.4);background:#0c1a2e">
-  <div class="pc-header">
-    <div class="pc-rank" style="font-size:22px">01</div>
-    <div style="flex:1">
-      <div class="pc-matches">006客胜 × 004客胜</div>
-      <div class="pc-bets">奥维耶多(4.60) × 萨索洛(3.27) · 双客爆冷</div>
-    </div>
-    <div class="pc-right">
-      <div class="pc-odds">15.04x</div>
-      <div class="pc-ev">EV −10.1% · 命中≈4.5%</div>
-    </div>
-  </div>
-  <div style="font-size:10px;color:var(--sub);font-family:var(--mono);line-height:1.7">今日最优串关 · 两场均客胜方向 · 高风险高赔率 · 建议≤总资金3%</div>
-</div>
-
-<div class="parlay-card">
-  <div class="pc-header">
-    <div class="pc-rank" style="font-size:22px">02</div>
-    <div style="flex:1">
-      <div class="pc-matches">006客胜 × 004平局</div>
-      <div class="pc-bets">奥维耶多(4.60) × 平局(2.90)</div>
-    </div>
-    <div class="pc-right">
-      <div class="pc-odds">13.34x</div>
-      <div class="pc-ev">EV −9.9% · 命中≈5.8%</div>
-    </div>
-  </div>
-</div>
-
-<div class="parlay-card">
-  <div class="pc-header">
-    <div class="pc-rank" style="font-size:22px">03</div>
-    <div style="flex:1">
-      <div class="pc-matches">006主胜 × 004客胜</div>
-      <div class="pc-bets">西班牙人(1.63) × 萨索洛(3.27)</div>
-    </div>
-    <div class="pc-right">
-      <div class="pc-odds">5.33x</div>
-      <div class="pc-ev">EV −18.2% · 命中≈12.5%</div>
-    </div>
-  </div>
-</div>
-
-  </div>
-
-  <!-- 赔率全览表（原TAB5+TAB6融合） -->
-
-  <div class="sec" style="margin-top:22px"><div class="sec-num">④</div><div class="sec-title">赔率 / EV 全览</div><div class="sec-sub">今日全部赔率 + SR概率 + EV对照</div><div class="sec-line"></div></div>
+  <div class="sec" style="margin-top:22px"><div class="sec-num">④</div><div class="sec-title">赔率 / EV 全览</div><div class="sec-sub">今日全部赔率 + 模型概率 + EV对照</div><div class="sec-line"></div></div>
   <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:11px;background:var(--card);margin-bottom:6px">
     <table style="min-width:640px">
       <thead><tr><th style="min-width:36px">#</th><th class="tl" style="min-width:100px">对阵</th><th>联赛</th><th>胜</th><th>平</th><th>负</th><th>盘口</th><th>让胜</th><th>水位</th><th>胜EV</th><th>平EV</th><th>负EV</th></tr></thead>
-      <tbody>
-        <tr><td><b>003</b></td><td class="tl">西汉姆 vs 布伦特</td><td>英足总杯</td><td>3.15</td><td>3.45</td><td><b>1.92</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[+1]</td><td>1.68</td><td style="color:var(--gold)">12.8%</td><td class="ev-n">—</td><td class="ev-n">—</td><td class="ev-n">—</td></tr>
-        <tr style="background:rgba(255,106,0,.02)"><td><b>004</b></td><td class="tl">拉齐奥 vs 萨索洛</td><td>意甲</td><td>2.09</td><td>2.90</td><td style="color:var(--cyan)"><b>3.27★</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>4.93</td><td style="color:var(--gold)">13.0%</td><td class="ev-b">−13.3%</td><td class="ev-b">−12.1%</td><td class="ev-m">−7.8%</td></tr>
-        <tr><td><b>005</b></td><td class="tl">敦刻尔克 vs 兰斯</td><td>法乙</td><td>3.15</td><td>3.00</td><td><b>2.10</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[+1]</td><td>1.57</td><td style="color:var(--gold)">12.6%</td><td class="ev-n">—</td><td class="ev-n">—</td><td class="ev-n">—</td></tr>
-        <tr style="background:rgba(0,229,160,.025)"><td><b>006</b></td><td class="tl"><b>西班牙人 vs 奥维耶多</b></td><td>西甲</td><td>1.63</td><td>3.35</td><td style="color:var(--cyan)"><b>4.60★★</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>3.26</td><td style="color:var(--gold)">12.9%</td><td class="ev-b">−16.5%</td><td class="ev-m">−7.5%</td><td class="ev-m">−2.5%</td></tr>
-        <tr><td><b>007</b></td><td class="tl">通德拉 vs 里奥阿维</td><td>葡超</td><td><b>2.00</b></td><td>3.06</td><td>3.30</td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>4.35</td><td style="color:var(--gold)">13.0%</td><td class="ev-n">—</td><td class="ev-n">—</td><td class="ev-n">—</td></tr>
+      <tbody id="ov-ev-tbody">
+        <tr><td colspan="12" style="text-align:center;color:var(--sub);padding:14px;font-family:var(--mono);font-size:11px">⏳ 正在加载…</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="tbl-note">★★ = 今日全场最优 · ★ = 本场最优 · 水位12.6-13.0%正常范围 · SR无覆盖场次EV不做推荐 · 左右滑动查看更多</div>
+  <div class="tbl-note" id="ov-ev-note">加载中…</div>
 
 </div>
 
@@ -478,16 +345,12 @@ tr:hover td{background:rgba(255,106,0,.02)}
   <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:11px;background:var(--card);margin-bottom:6px">
     <table style="min-width:520px">
       <thead><tr><th style="min-width:36px">#</th><th class="tl" style="min-width:100px">对阵</th><th>联赛</th><th>胜</th><th>平</th><th>负</th><th>盘口</th><th>让胜</th><th>水位</th></tr></thead>
-      <tbody>
-        <tr><td><b>003</b></td><td class="tl">西汉姆 vs 布伦特福德</td><td>英足总杯</td><td>3.15</td><td>3.45</td><td><b>1.92</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[+1]</td><td>1.68</td><td style="color:var(--gold)">12.8%</td></tr>
-        <tr style="background:rgba(255,106,0,.02)"><td><b>004</b></td><td class="tl">拉齐奥 vs 萨索洛</td><td>意甲</td><td>2.09</td><td>2.90</td><td style="color:var(--cyan)"><b>3.27★</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>4.93</td><td style="color:var(--gold)">13.0%</td></tr>
-        <tr><td><b>005</b></td><td class="tl">敦刻尔克 vs 兰斯</td><td>法乙</td><td>3.15</td><td>3.00</td><td><b>2.10</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[+1]</td><td>1.57</td><td style="color:var(--gold)">12.6%</td></tr>
-        <tr style="background:rgba(0,229,160,.02)"><td><b>006</b></td><td class="tl"><b>西班牙人 vs 奥维耶多</b></td><td>西甲</td><td>1.63</td><td>3.35</td><td style="color:var(--cyan)"><b>4.60★★</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>3.26</td><td style="color:var(--gold)">12.9%</td></tr>
-        <tr><td><b>007</b></td><td class="tl">通德拉 vs 里奥阿维</td><td>葡超</td><td><b>2.00</b></td><td>3.06</td><td>3.30</td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">[−1]</td><td>4.35</td><td style="color:var(--gold)">13.0%</td></tr>
+      <tbody id="odds-tbody">
+        <tr><td colspan="9" style="text-align:center;color:var(--sub);padding:14px;font-family:var(--mono);font-size:11px">⏳ 正在加载…</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="tbl-note">★★ = 今日全场最优(006客胜) · ★ = 本场最优 · 水位12.6-13.0%正常范围 · SR无覆盖场次（003/005/007）赔率仅供参考，不做EV推荐 · 左右滑动查看更多</div>
+  <div class="tbl-note" id="odds-note">加载中…</div>
 </div>
 <div id="tab-info" class="section">
   <div class="sec"><div class="sec-num">📋</div><div class="sec-title">数据说明</div><div class="sec-sub">数据来源 · 计算方法 · 精算引擎覆盖</div><div class="sec-line"></div></div>
@@ -888,6 +751,7 @@ function zhcwJsonp(code){
       resolve(data);
     };
     const script=document.createElement('script');
+    script.referrerPolicy='no-referrer';
     script.onerror=function(){clearTimeout(t);delete window[cb];reject(new Error('网络错误'));};
     script.src='https://jc.zhcw.com/port/client_json.php?callback='+cb+'&transactionType='+code;
     document.head.appendChild(script);
@@ -911,7 +775,10 @@ async function scoreFetch(){
     const rawRq=d?.rq?.data||[];
     const rawTjq=d?.tjq?.data||[];
     const rawBqc=d?.bqc?.data||[];
-    if(!rawSpf.length)throw new Error('无SPF数据，精算无法启动');
+    if(!rawSpf.length){
+      const errs=entries.filter(([,v])=>v&&v.error).map(([k,v])=>`${k}:${v.error}`).join(' | ');
+      throw new Error(errs?`拉取失败(${errs})`:'无SPF数据，竞彩暂无场次');
+    }
 
     // matchId映射
     // 真实接口对应：
@@ -967,10 +834,203 @@ async function scoreFetch(){
     if(!ms.length)throw new Error('无有效场次');
     setSS(`✓ ${ms.length}场 · ${rawCrs.length?'比分赔率✓':'比分无赔率⚠'} · 让球/总进球/半全场全部加载`,'var(--green)');
     scoreRenderList(ms);
+    renderOverview(ms);
   }catch(e){
     setSS('拉取失败: '+e.message,'var(--red)');
+    const ov=document.getElementById('ov-tbody');
+    if(ov)ov.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--red);padding:14px;font-family:var(--mono);font-size:11px">❌ ${e.message}</td></tr>`;
+    const note=document.getElementById('ov-note');
+    if(note)note.textContent='拉取失败: '+e.message;
   }
   if(btn)btn.disabled=false;
+}
+
+// ── 今日概览动态渲染 ──
+function renderOverview(ms){
+  // 今日日期
+  const td=new Date();
+  const dateStr=`${td.getFullYear()}·${String(td.getMonth()+1).padStart(2,'0')}·${String(td.getDate()).padStart(2,'0')}`;
+  const navDate=document.getElementById('nav-date');
+  if(navDate)navDate.textContent=dateStr;
+
+  // 计算每场EV（泊松+DC，纯赔率反推λ，不依赖BSD）
+  const evMap={};
+  ms.forEach(m=>{
+    if(!m.spf)return;
+    const[pH,pD,pA]=oddsToProb(m.spf.h,m.spf.d,m.spf.a);
+    const avg=getAvg(m.league);
+    const[lH,lA]=fitLambda(pH,pD,pA,avg);
+    const[vH,vD,vA]=calcHDA(lH,lA);
+    const evH=(vH*m.spf.h-1)*100,evD=(vD*m.spf.d-1)*100,evA=(vA*m.spf.a-1)*100;
+    const best=Math.max(evH,evD,evA);
+    const dir=evH>=evD&&evH>=evA?'主胜':evD>=evA?'平局':'客胜';
+    evMap[m.matchId]={evH,evD,evA,best,dir,vH,vD,vA};
+  });
+
+  // 最优场次
+  let bestMatch=null,bestEV=-999;
+  ms.forEach(m=>{if(evMap[m.matchId]&&evMap[m.matchId].best>bestEV){bestEV=evMap[m.matchId].best;bestMatch=m;}});
+  const evCnt=Object.keys(evMap).length;
+
+  // 更新nav
+  const el=id=>document.getElementById(id);
+  if(el('nav-cnt'))el('nav-cnt').textContent=ms.length;
+  if(el('nav-ev-cnt'))el('nav-ev-cnt').textContent=evCnt;
+  if(el('nav-best-id')&&bestMatch)el('nav-best-id').textContent='★'+bestMatch.id;
+  if(el('nav-best-ev')&&bestMatch)el('nav-best-ev').textContent=bestEV.toFixed(1)+'%';
+
+  // 更新section①副标题
+  if(el('ov-sec1-sub'))el('ov-sec1-sub').textContent=`${ms.length}场全部列出 · 模型精算EV · 无赔率明确标注`;
+
+  // EV样式
+  const ecls=v=>v>0?'ev-p':v>-8?'ev-m':'ev-b';
+
+  // 渲染section①表格
+  const tbody=el('ov-tbody');
+  if(tbody){
+    tbody.innerHTML=ms.map(m=>{
+      const ev=evMap[m.matchId];
+      const isBest=bestMatch&&m.matchId===bestMatch.matchId;
+      if(!ev)return`<tr><td><b>${m.id}</b></td><td class="tl">${m.home} vs ${m.away}</td><td>${m.league}</td><td style="font-family:var(--mono);font-size:10px">${m.time}</td><td><span style="color:var(--sub)">无赔率</span></td><td><span class="src-tag src-no">—</span></td></tr>`;
+      const bgStyle=isBest?'style="background:rgba(0,229,160,.025)"':ev.best>-10?'style="background:rgba(255,106,0,.025)"':'';
+      const label=`${ev.dir} ${ev.best.toFixed(1)}%`;
+      return`<tr ${bgStyle}><td><b>${m.id}</b></td><td class="tl">${isBest?'<b>':''}${m.home} vs ${m.away}${isBest?'</b>':''}</td><td>${m.league}</td><td style="font-family:var(--mono);font-size:10px">${m.time}</td><td><b class="${ecls(ev.best)}">${isBest?'★ ':''}${label}</b></td><td><span class="src-tag src-sr" style="background:rgba(167,139,250,.1);color:var(--purple);border-color:rgba(167,139,250,.3)">模型</span></td></tr>`;
+    }).join('');
+  }
+
+  // 更新section①备注
+  const ovNote=el('ov-note');
+  if(ovNote){
+    const noData=ms.filter(m=>!evMap[m.matchId]);
+    let note=`📌 今日${ms.length}场，模型覆盖${evCnt}场。`;
+    if(bestMatch)note+=`<b style="color:var(--cyan)">${bestMatch.id} ${evMap[bestMatch.matchId].dir} ${bestEV.toFixed(1)}%</b> 为今日全场最优。`;
+    if(noData.length)note+=`${noData.map(m=>m.id).join('·')}无赔率不做EV。`;
+    note+=bestEV>0?`<b style="color:var(--green)">今日有正期望场次！</b>`:`<b style="color:var(--red)">今日无正期望场次。</b>`;
+    ovNote.innerHTML=note;
+  }
+
+  // 渲染section②精算卡片（top3）
+  const srCards=el('ov-sr-cards');
+  if(srCards){
+    const tops=ms.filter(m=>evMap[m.matchId]).sort((a,b)=>evMap[b.matchId].best-evMap[a.matchId].best).slice(0,3);
+    if(!tops.length){srCards.innerHTML='<div style="color:var(--sub);padding:20px;text-align:center;font-size:12px">暂无精算场次</div>';return;}
+    srCards.innerHTML=tops.map((m,i)=>{
+      const ev=evMap[m.matchId];
+      const{vH,vD,vA,evH,evD,evA,best,dir}=ev;
+      const isBest=i===0;
+      const evtag=best>0?'ev-p':best>-5?'ev-near':'ev-b';
+      const grade=best>0?'grade-A':best>-8?'grade-B':'grade-C';
+      const wr=waterRate([m.spf.h,m.spf.d,m.spf.a]).toFixed(1);
+      const starH=dir==='主胜'?'★':'',starD=dir==='平局'?'★':'',starA=dir==='客胜'?'★':'';
+      return`<div class="card ${grade}" style="margin-bottom:0${isBest?';border-color:rgba(34,211,238,.2)':''}">
+<div class="card-inner"><div class="cbar"></div><div class="cbody">
+<div class="card-head">
+  <div class="card-left">
+    <span class="mnum">#${m.id}</span>
+    <span class="lbadge">${m.league}</span>
+    <span class="mname">${m.home} vs ${m.away}</span>
+    ${isBest?'<span style="font-size:10px;background:rgba(34,211,238,.12);color:var(--cyan);border:1px solid rgba(34,211,238,.25);padding:2px 8px;border-radius:3px;font-family:var(--mono)">★ 今日最优</span>':''}
+  </div>
+  <div class="card-right"><span class="ev-tag ${evtag}">${best.toFixed(1)}%</span><span class="src-tag src-sr" style="background:rgba(167,139,250,.1);color:var(--purple);border-color:rgba(167,139,250,.3)">模型</span></div>
+</div>
+<div class="prob-row">
+  <div class="prob-col">
+    <div class="prob-lbl">主胜 ${m.home}</div>
+    <div class="prob-bar-wrap"><div class="prob-bar pb-w" style="width:${(vH*100).toFixed(1)}%"></div></div>
+    <div class="prob-pct pp-w">${(vH*100).toFixed(1)}%</div>
+    <div class="prob-odd">@${m.spf.h} · EV <span class="${ecls(evH)}">${evH.toFixed(1)}%${starH}</span></div>
+  </div>
+  <div class="prob-col">
+    <div class="prob-lbl">平局</div>
+    <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:${(vD*100).toFixed(1)}%"></div></div>
+    <div class="prob-pct pp-d">${(vD*100).toFixed(1)}%</div>
+    <div class="prob-odd">@${m.spf.d} · EV <span class="${ecls(evD)}">${evD.toFixed(1)}%${starD}</span></div>
+  </div>
+  <div class="prob-col">
+    <div class="prob-lbl">客胜 ${m.away}</div>
+    <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:${(vA*100).toFixed(1)}%"></div></div>
+    <div class="prob-pct pp-l">${(vA*100).toFixed(1)}%</div>
+    <div class="prob-odd">@${m.spf.a} · EV <span class="${ecls(evA)}">${evA.toFixed(1)}%${starA}</span></div>
+  </div>
+</div>
+<div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.12);border-radius:7px;padding:8px 12px;font-size:11px;color:var(--sub2);line-height:1.7">
+  水位${wr}% · 泊松+DC模型精算（赔率反推λ）· ${dir} EV${best.toFixed(1)}%为本场最优
+</div>
+</div></div></div>`;
+    }).join('');
+  }
+
+  // 渲染section③串关
+  const ovParlay=el('ov-parlay');
+  if(ovParlay){
+    const parlMs=ms.filter(m=>evMap[m.matchId]).sort((a,b)=>evMap[b.matchId].best-evMap[a.matchId].best).slice(0,4);
+    if(parlMs.length<2){ovParlay.innerHTML='<div class="tbl-note">场次不足，无法生成串关组合</div>';}
+    else{
+      const combos=[];
+      for(let i=0;i<parlMs.length;i++)for(let j=i+1;j<parlMs.length;j++){
+        const m1=parlMs[i],m2=parlMs[j],ev1=evMap[m1.matchId],ev2=evMap[m2.matchId];
+        const d1=ev1.dir==='主胜'?m1.spf.h:ev1.dir==='平局'?m1.spf.d:m1.spf.a;
+        const d2=ev2.dir==='主胜'?m2.spf.h:ev2.dir==='平局'?m2.spf.d:m2.spf.a;
+        const p1=ev1.dir==='主胜'?ev1.vH:ev1.dir==='平局'?ev1.vD:ev1.vA;
+        const p2=ev2.dir==='主胜'?ev2.vH:ev2.dir==='平局'?ev2.vD:ev2.vA;
+        const po=+(d1*d2).toFixed(2),pp=p1*p2,pev=(pp*po-1)*100;
+        combos.push({m1,m2,d1,d2,p1,p2,po,pp,pev,ev1,ev2});
+      }
+      combos.sort((a,b)=>b.pev-a.pev);
+      const top3=combos.slice(0,3);
+      const hasPos=top3.some(c=>c.pev>0);
+      const noteStr=hasPos?'今日有正期望串关组合，凯利公式建议适量参与。':'⚠️ 今日无正期望场次，凯利建议投注比例=0。以下为EV相对最优组合，若参与请严格控制金额。';
+      const sec3sub=el('ov-sec3-sub');
+      if(sec3sub)sec3sub.textContent=`${parlMs.length}场 · 二串一 · 凯利参考`;
+      ovParlay.innerHTML=`<div class="tbl-note" style="margin-bottom:12px">${noteStr}</div>`
+        +`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;margin-bottom:10px">`
+        +top3.map((c,i)=>{
+          const tl1=c.ev1.dir==='主胜'?c.m1.home:c.ev1.dir==='客胜'?c.m1.away:'平局';
+          const tl2=c.ev2.dir==='主胜'?c.m2.home:c.ev2.dir==='客胜'?c.m2.away:'平局';
+          const bdr=i===0?'border-color:rgba(34,211,238,.4);background:#0c1a2e':'';
+          return`<div class="parlay-card" style="${bdr}"><div class="pc-header">
+<div class="pc-rank" style="font-size:22px">${String(i+1).padStart(2,'0')}</div>
+<div style="flex:1"><div class="pc-matches">${c.m1.id}${c.ev1.dir} × ${c.m2.id}${c.ev2.dir}</div>
+<div class="pc-bets">${tl1}(${c.d1.toFixed(2)}) × ${tl2}(${c.d2.toFixed(2)})</div></div>
+<div class="pc-right"><div class="pc-odds">${c.po}x</div>
+<div class="pc-ev">EV ${c.pev.toFixed(1)}% · 命中≈${(c.pp*100).toFixed(1)}%</div></div>
+</div></div>`;
+        }).join('')+`</div>`;
+    }
+  }
+
+  // 渲染section④ EV全览表
+  const evTbody=el('ov-ev-tbody');
+  if(evTbody){
+    evTbody.innerHTML=ms.map(m=>{
+      const ev=evMap[m.matchId];
+      const isBest=bestMatch&&m.matchId===bestMatch.matchId;
+      if(!m.spf||!ev)return`<tr><td><b>${m.id}</b></td><td class="tl">${m.home} vs ${m.away}</td><td>${m.league}</td><td colspan="9" style="color:var(--sub);font-size:10px">无赔率</td></tr>`;
+      const rqn=m.rq?m.rq.rq:0;
+      const rql=rqn>0?`[+${rqn}]`:rqn<0?`[${rqn}]`:'[0]';
+      const rqo=m.rq?m.rq.h:'—';
+      const wr=waterRate([m.spf.h,m.spf.d,m.spf.a]).toFixed(1);
+      const bg=isBest?'style="background:rgba(0,229,160,.025)"':'';
+      return`<tr ${bg}><td><b>${m.id}</b></td><td class="tl">${m.home} vs ${m.away}</td><td>${m.league}</td><td>${m.spf.h}</td><td>${m.spf.d}</td><td style="color:var(--cyan)"><b>${m.spf.a}${isBest?'★★':ev.dir==='客胜'?'★':''}</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">${rql}</td><td>${rqo}</td><td style="color:var(--gold)">${wr}%</td><td class="${ecls(ev.evH)}">${ev.evH.toFixed(1)}%</td><td class="${ecls(ev.evD)}">${ev.evD.toFixed(1)}%</td><td class="${ecls(ev.evA)}">${ev.evA.toFixed(1)}%</td></tr>`;
+    }).join('');
+    const evNote=el('ov-ev-note');
+    if(evNote)evNote.textContent=`★★ = 今日全场最优 · ★ = 本场最优 · 水位正常范围 · 模型精算EV · 左右滑动查看更多`;
+  }
+
+  // 更新Tab4赔率盘口表
+  const oddsTb=el('odds-tbody');
+  if(oddsTb){
+    oddsTb.innerHTML=ms.map(m=>{
+      if(!m.spf)return`<tr><td><b>${m.id}</b></td><td class="tl">${m.home} vs ${m.away}</td><td>${m.league}</td><td colspan="6" style="color:var(--sub)">无赔率</td></tr>`;
+      const rqn=m.rq?m.rq.rq:0;
+      const rql=rqn>0?`[+${rqn}]`:rqn<0?`[${rqn}]`:'[0]';
+      const rqo=m.rq?m.rq.h:'—';
+      const wr=waterRate([m.spf.h,m.spf.d,m.spf.a]).toFixed(1);
+      return`<tr><td><b>${m.id}</b></td><td class="tl">${m.home} vs ${m.away}</td><td>${m.league}</td><td>${m.spf.h}</td><td>${m.spf.d}</td><td><b>${m.spf.a}</b></td><td style="font-family:var(--mono);font-size:10px;color:var(--gold)">${rql}</td><td>${rqo}</td><td style="color:var(--gold)">${wr}%</td></tr>`;
+    }).join('');
+    const oddsNote=el('odds-note');
+    if(oddsNote)oddsNote.textContent=`今日全部赔率 · 水位 = 庄家抽水率 · 左右滑动查看更多`;
+  }
 }
 
 // 示例数据（含让球/总进球/半全场）
@@ -1807,6 +1867,17 @@ function runMonteCarloWithData(selected){
     });
   });
 }
+
+// ── 页面加载时自动拉取今日竞彩数据 ──
+document.addEventListener('DOMContentLoaded',function(){
+  // 更新日期显示
+  const td=new Date();
+  const ds=`${td.getFullYear()}·${String(td.getMonth()+1).padStart(2,'0')}·${String(td.getDate()).padStart(2,'0')}`;
+  const nd=document.getElementById('nav-date');
+  if(nd)nd.textContent=ds;
+  // 自动拉取
+  setTimeout(scoreFetch,300);
+});
 
 </script>
 
