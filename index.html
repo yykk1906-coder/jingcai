@@ -135,7 +135,7 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,106,0,.02)}
 .tbl-note{font-size:10.5px;color:var(--sub);padding:8px 12px;background:rgba(167,139,250,.04);border-radius:6px;border:1px solid rgba(167,139,250,.12);margin-top:6px;line-height:1.7}
 .detail-table th,.detail-table td{font-size:11.5px;padding:8px 10px}
-.ev-p{color:var(--green);font-weight:800}.ev-n{color:var(--red);font-weight:800}.ev-m{color:var(--gold);font-weight:800}
+.ev-p{color:var(--green);font-weight:800}.ev-neg{color:var(--red);font-weight:800}.ev-mid{color:var(--gold);font-weight:800}
 /* parlay */
 .parlay-card{background:#0b1627;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
 .pc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -235,12 +235,12 @@ tr:hover td{background:rgba(255,106,0,.02)}
 <!-- TAB NAV（精简版：6个）-->
 
 <div class="tabnav" id="tabs">
-  <div class="tab active"  onclick="sw('overview')">📋 今日概览</div>
-  <div class="tab"         onclick="sw('score')">⚡ 精算引擎</div>
-  <div class="tab tab-mc"  onclick="sw('mc')">🎲 串关模拟</div>
-  <div class="tab"         onclick="sw('odds')">📊 赔率盘口</div>
-  <div class="tab"         onclick="sw('early')" style="color:var(--gold)">🌅 早场联赛</div>
-  <div class="tab"         onclick="sw('info')">📋 数据说明</div>
+  <div class="tab active"  onclick="sw(event,'overview')">📋 今日概览</div>
+  <div class="tab"         onclick="sw(event,'score')">⚡ 精算引擎</div>
+  <div class="tab tab-mc"  onclick="sw(event,'mc')">🎲 串关模拟</div>
+  <div class="tab"         onclick="sw(event,'odds')">📊 赔率盘口</div>
+  <div class="tab"         onclick="sw(event,'early')" style="color:var(--gold)">🌅 早场联赛</div>
+  <div class="tab"         onclick="sw(event,'info')">📋 数据说明</div>
 </div>
 
 <div class="main">
@@ -272,7 +272,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:14px">
 
-```
 <!-- 006 -->
 <div class="card grade-A" style="margin-bottom:0;border-color:rgba(34,211,238,.2)">
   <div class="card-inner"><div class="cbar"></div><div class="cbody">
@@ -349,7 +348,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
     </div>
   </div></div>
 </div>
-```
 
   </div>
 
@@ -361,7 +359,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;margin-bottom:10px">
 
-```
 <div class="parlay-card" style="border-color:rgba(34,211,238,.4);background:#0c1a2e">
   <div class="pc-header">
     <div class="pc-rank" style="font-size:22px">01</div>
@@ -404,7 +401,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
     </div>
   </div>
 </div>
-```
 
   </div>
 
@@ -426,86 +422,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
   <div class="tbl-note">★★ = 今日全场最优 · ★ = 本场最优 · 水位12.6-13.0%正常范围 · SR无覆盖场次EV不做推荐 · 左右滑动查看更多</div>
 
 </div>
-
-<!-- ══ TAB 2: 精算引擎 ══（原TAB4，直接保留）
-          <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:27.6%"></div></div>
-          <div class="prob-pct pp-d">27.6%</div>
-          <div class="prob-odd">赔率 3.35</div>
-        </div>
-        <div class="prob-col">
-          <div class="prob-lbl">客胜 奥维耶多</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:21.2%"></div></div>
-          <div class="prob-pct pp-l">21.2%</div>
-          <div class="prob-odd">赔率 4.60</div>
-        </div>
-      </div>
-      <div class="metrics">
-        <div class="metric"><div class="mk">庄家抽水</div><div class="mv y">12.9%</div></div>
-        <div class="metric"><div class="mk">最优EV</div><div class="mv y">−2.5%</div></div>
-        <div class="metric"><div class="mk">推荐方向</div><div class="mv r">奥维耶多胜</div></div>
-        <div class="metric"><div class="mk">SR客胜率</div><div class="mv">21.2%</div></div>
-        <div class="metric"><div class="mk">庄家隐含</div><div class="mv">21.7%</div></div>
-        <div class="metric"><div class="mk">SR差值</div><div class="mv g">−0.5%≈0</div></div>
-      </div>
-      <div class="rec-row">
-        <span class="rec-lbl">★最优单项</span>
-        <span class="rec-bet rb-y">奥维耶多客胜 @4.60</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--cyan);margin-left:auto">EV −2.5% · 今日全场最优</span>
-      </div>
-      <button class="dtoggle" onclick="td(this)"><span class="dicon">▶</span> 判断依据</button>
-      <div class="dbody">SR显示西班牙人主胜51.2%，但赔率1.63对应庄家隐含概率61.3%，庄家<b>高估西班牙人约10个百分点</b>，导致主胜EV高达−16.5%，是本场最差选择。奥维耶多SR客胜21.2% vs 庄家隐含21.7%，两者几乎完全吻合，庄家定价最公允，EV仅损耗−2.5%。平局SR 27.6% vs 隐含25.8%，EV −7.5%次优。注意：这不代表奥维耶多大概率赢，只是赔率相对值得。</div>
-    </div></div>
-  </div>
-
-  <!-- 004 拉齐奥 -->
-
-  <div class="card grade-B" style="animation-delay:.08s">
-    <div class="card-inner"><div class="cbar"></div><div class="cbody">
-      <div class="card-head">
-        <div class="card-left">
-          <span class="mnum">#004</span>
-          <span class="lbadge lb-i">意甲 Serie A</span>
-          <span class="mname">拉齐奥 vs 萨索洛</span>
-        </div>
-        <div class="card-right"><span class="ev-tag ev-near">△ −7.8%</span><span class="src-tag src-sr">SR</span></div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-col">
-          <div class="prob-lbl">主胜 拉齐奥</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-w" style="width:41.5%"></div></div>
-          <div class="prob-pct pp-w">41.5%</div>
-          <div class="prob-odd">赔率 2.09</div>
-        </div>
-        <div class="prob-col">
-          <div class="prob-lbl">平局</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:30.3%"></div></div>
-          <div class="prob-pct pp-d">30.3%</div>
-          <div class="prob-odd">赔率 2.90</div>
-        </div>
-        <div class="prob-col">
-          <div class="prob-lbl">客胜 萨索洛</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:28.2%"></div></div>
-          <div class="prob-pct pp-l">28.2%</div>
-          <div class="prob-odd">赔率 3.27</div>
-        </div>
-      </div>
-      <div class="metrics">
-        <div class="metric"><div class="mk">庄家抽水</div><div class="mv y">13.0%</div></div>
-        <div class="metric"><div class="mk">最优EV</div><div class="mv y">−7.8%</div></div>
-        <div class="metric"><div class="mk">推荐方向</div><div class="mv r">△萨索洛胜</div></div>
-        <div class="metric"><div class="mk">SR客胜率</div><div class="mv">28.2%</div></div>
-        <div class="metric"><div class="mk">庄家隐含</div><div class="mv">23.9%</div></div>
-        <div class="metric"><div class="mk">SR差值</div><div class="mv g">+4.3%</div></div>
-      </div>
-      <div class="rec-row">
-        <span class="rec-lbl">次优</span>
-        <span class="rec-bet rb-y">萨索洛客胜 @3.27</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--gold);margin-left:auto">EV −7.8%</span>
-      </div>
-      <button class="dtoggle" onclick="td(this)"><span class="dicon">▶</span> 判断依据</button>
-      <div class="dbody">本场均衡，拉齐奥主胜41.5%但赔率2.09隐含47.8%，庄家高估拉齐奥。萨索洛SR 28.2%远高于庄家隐含23.9%，差值+4.3个百分点，是今日SR与庄家差距第二明显场次。萨索洛虽积分落后，但面临保级压力，客场仍有战斗力。让球-1客队赔率1.55隐含64.5%，无让球SR数据不精算。</div>
-    </div></div>
-  </div>
 
 <!-- ══ TAB 2: 精算引擎 ══ -->
 
@@ -636,7 +552,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
     <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px">📊 精算引擎参数速查总表</div>
     <div style="display:flex;flex-direction:column;gap:8px">
 
-```
   <!-- J1联赛 -->
   <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px">
     <div style="font-size:12px;font-weight:700;color:#ff6a00;margin-bottom:6px">🇯🇵 J1联赛</div>
@@ -732,7 +647,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
 <div style="margin-top:12px;font-size:11px;color:var(--sub2);line-height:1.8">
   <b style="color:var(--gold)">如何使用：</b>用户提供早场赔率截图 → 引擎调用对应行参数 → 计算庄家隐含概率 → 与基准统计对比识别异常定价。<b style="color:var(--red)">SR无覆盖，不提供EV推荐。</b>
 </div>
-```
 
   </div>
 </div>
@@ -741,11 +655,11 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
 <script>
 // ══ 标签切换 ══
-function sw(id){
+function sw(e,id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  event.currentTarget.classList.add('active');
+  e.currentTarget.classList.add('active');
   window.scrollTo({top:document.querySelector('.tabnav').offsetTop-10,behavior:'smooth'});
 }
 function td(btn){
@@ -1791,7 +1705,7 @@ function runMonteCarloWithData(selected){
           combos3.forEach(([a,b,c2],ci)=>{if(results[a]&&results[b]&&results[c2])combo3wins[ci]++;});
         }
 
-        const evClass=ev=>ev>=3?'ev-pos':ev>=-5?'ev-neu':'ev-neg';
+        const evClass=ev=>ev>=3?'ev-g':ev>=-5?'ev-m':'ev-b';
 
         const matchRows=selected.map((s,i)=>{
           const simProb=+(wins[i]/N*100).toFixed(1);
