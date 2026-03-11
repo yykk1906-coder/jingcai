@@ -13,7 +13,7 @@
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'X-Api-Key, Content-Type',
+  'Access-Control-Allow-Headers': 'X-Api-Key, X-Bsd-Key, Content-Type',
 };
 
 const JSON_HEADERS = {
@@ -106,6 +106,30 @@ async function handleApiFootball(req, url) {
   }
 }
 
+/** /bsd/* → sports.bzzoiro.com 代理 */
+async function handleBsd(req, url) {
+  const bsdKey = req.headers.get('X-Bsd-Key') || '';
+  if (!bsdKey) return jsonResponse({ error: '缺少 X-Bsd-Key 请求头' }, 401);
+
+  const bsdPath = url.pathname.slice(4) + url.search; // 去掉 /bsd 前缀
+  const bsdUrl = 'https://sports.bzzoiro.com' + bsdPath;
+
+  try {
+    const r = await fetchWithTimeout(bsdUrl, {
+      headers: { 'Authorization': 'Token ' + bsdKey },
+    });
+    if (!r.ok) return jsonResponse({ error: `上游返回 ${r.status}` }, r.status);
+    const data = await r.json();
+    return jsonResponse(data);
+  } catch (e) {
+    const isTimeout = e.name === 'TimeoutError';
+    return jsonResponse(
+      { error: isTimeout ? '请求上游超时' : e.message },
+      isTimeout ? 504 : 502,
+    );
+  }
+}
+
 /** /zhcw → 并发拉取五种竞彩赔率数据 */
 async function handleZhcw() {
   const tasks = Object.entries(ZHCW_APIS).map(async ([key, code]) => {
@@ -145,6 +169,10 @@ export default {
 
     if (url.pathname.startsWith('/af/') || url.pathname === '/af') {
       return handleApiFootball(req, url);
+    }
+
+    if (url.pathname.startsWith('/bsd/') || url.pathname === '/bsd') {
+      return handleBsd(req, url);
     }
 
     if (url.pathname === '/zhcw') {

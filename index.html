@@ -680,6 +680,7 @@ const PROXY='https://proxy.947552250.workers.dev';
 // ── 方案B：独立λ计算（api-football.com）──
 // 填入你的API Key后自动启用独立λ，覆盖赔率反推λ
 const AF_KEY='83fa56de8ec29b67871e884c5994629d'; // 在此填入 api-football.com 的 API Key
+const BSD_KEY='A3f73245c1977a9ee85437522eca229962f321f2'; // Bzzoiro Sports Data API Token
 const AF_BASE='https://v3.football.api-sports.io';
 // 联赛ID映射（api-football league id）
 const AF_LEAGUE={
@@ -735,6 +736,31 @@ async function fetchIndepLambda(homeCN,awayCN,leagueCN){
     const lHc=Math.max(0.15,Math.min(3.9,lH));
     const lAc=Math.max(0.15,Math.min(3.9,lA));
     return{lH:lHc,lA:lAc,srcH:homeScored.length,srcA:awayScored.length};
+  }catch(e){return null;}
+}
+
+// 从BSD获取CatBoost ML预测概率
+async function fetchBsdPrediction(homeCN,awayCN){
+  if(!BSD_KEY)return null;
+  const homeEN=(AF_TEAM[homeCN]||homeCN).toLowerCase();
+  const awayEN=(AF_TEAM[awayCN]||awayCN).toLowerCase();
+  // 取每个单词中≥4字符的关键词做模糊匹配
+  const kw=s=>s.split(/\s+/).filter(w=>w.length>=4);
+  const hwds=kw(homeEN),awds=kw(awayEN);
+  const hit=(bsdName,words)=>{const n=bsdName.toLowerCase();return words.some(w=>n.includes(w));};
+  try{
+    const r=await fetch(`${PROXY}/bsd/api/predictions/?upcoming=true`,{headers:{'X-Bsd-Key':BSD_KEY}});
+    if(!r.ok)return null;
+    const data=await r.json();
+    const list=Array.isArray(data)?data:(data.results||[]);
+    const pred=list.find(p=>{
+      const hn=String(p.home_team?.name||p.home_team||'');
+      const an=String(p.away_team?.name||p.away_team||'');
+      return hit(hn,hwds.length?hwds:[homeEN])&&hit(an,awds.length?awds:[awayEN]);
+    });
+    if(!pred)return null;
+    return{probH:pred.prob_home_win,probD:pred.prob_draw,probA:pred.prob_away_win,
+           probO25:pred.prob_over_25,probBtts:pred.prob_btts_yes,confidence:pred.confidence};
   }catch(e){return null;}
 }
 
@@ -1120,8 +1146,11 @@ async function scoreSelect(idx){
   const[lHodds,lAodds]=fitLambda(pH,pD,pA,avg);// 赔率反推λ
 
   // 尝试获取独立λ（方案B）
-  document.getElementById('score-result').innerHTML=`<div style="color:var(--sub);font-size:12px;padding:10px">⏳ 正在加载精算数据${AF_KEY?'（含独立λ验证）':''}…</div>`;
-  const indep=await fetchIndepLambda(m.home,m.away,m.league);
+  document.getElementById('score-result').innerHTML=`<div style="color:var(--sub);font-size:12px;padding:10px">⏳ 正在加载精算数据${AF_KEY?'（含独立λ验证）':''}${BSD_KEY?'+ BSD ML预测':''}…</div>`;
+  const [indep,bsdPred]=await Promise.all([
+    fetchIndepLambda(m.home,m.away,m.league),
+    fetchBsdPrediction(m.home,m.away)
+  ]);
 
   // 最终使用λ：有独立λ时取加权融合（独立λ权重60%，赔率反推40%），无则纯赔率反推
   let lH,lA,lambdaSrc;
@@ -1345,6 +1374,22 @@ async function scoreSelect(idx){
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 14px;margin-bottom:10px;font-size:10px;font-family:var(--mono);color:var(--sub)">
       λ来源：${lambdaSrc}${!AF_KEY?' · <span style="color:var(--gold)">填入 AF_KEY 后启用独立λ验证，突破赔率反推天花板</span>':''}
     </div>`}
+
+    ${bsdPred?`
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.22);border-radius:8px;padding:9px 14px;margin-bottom:10px;font-size:10px;font-family:var(--mono);line-height:1.9">
+      <span style="color:var(--cyan);font-weight:700">⚡ BSD CatBoost ML预测</span>
+      <span style="margin-left:8px;background:rgba(56,182,255,.12);color:var(--cyan);padding:1px 6px;border-radius:3px">置信度 ${bsdPred.confidence!=null?(bsdPred.confidence*100).toFixed(0):'—'}%</span><br>
+      主胜 <b style="color:var(--green)">${(bsdPred.probH*100).toFixed(1)}%</b> ·
+      平 <b style="color:var(--gold)">${(bsdPred.probD*100).toFixed(1)}%</b> ·
+      客胜 <b style="color:var(--red)">${(bsdPred.probA*100).toFixed(1)}%</b>
+      &nbsp;|&nbsp; Over2.5 <b>${bsdPred.probO25!=null?(bsdPred.probO25*100).toFixed(1)+'%':'—'}</b>
+      &nbsp;|&nbsp; 双进球 <b>${bsdPred.probBtts!=null?(bsdPred.probBtts*100).toFixed(1)+'%':'—'}</b>
+      ${(()=>{
+        const diff=Math.abs(bsdPred.probH-vH)+Math.abs(bsdPred.probA-vA);
+        if(diff>0.12)return`<br><span style="color:var(--gold)">⚠ BSD与泊松分歧 ${(diff*100).toFixed(1)}pp · 两模型存在矛盾，谨慎参考</span>`;
+        return`<br><span style="color:var(--green)">✓ BSD与泊松方向一致（差异 ${(diff*100).toFixed(1)}pp）</span>`;
+      })()}
+    </div>`:''}
 
     <div class="tbl-note" style="margin-bottom:10px">
       <b style="color:var(--cyan)">真实竞彩胜平负赔率</b>：胜 <b style="color:var(--green)">${m.spf.h}</b> / 平 <b style="color:var(--gold)">${m.spf.d}</b> / 负 <b style="color:var(--red)">${m.spf.a}</b>
