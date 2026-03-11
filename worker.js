@@ -3,7 +3,7 @@
  *
  * 路由：
  *   OPTIONS  任意路径        → CORS 预检
- *   ANY      /af/*           → api-football 代理（需 Header: X-Api-Key）
+ *   ANY      /bsd/*          → Bzzoiro Sports Data 代理（需 Header: X-Bsd-Key）
  *   GET      /zhcw           → 并发拉取五种竞彩数据（spf/crs/rq/tjq/bqc）
  *   其他                     → 404
  */
@@ -13,7 +13,7 @@
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'X-Api-Key, X-Bsd-Key, Content-Type',
+  'Access-Control-Allow-Headers': 'X-Bsd-Key, Content-Type',
 };
 
 const JSON_HEADERS = {
@@ -70,42 +70,6 @@ function parseZhcwJsonp(text) {
 
 // ── 路由处理 ──────────────────────────────────────────────────────────────────
 
-/** /af/* → api-football 代理 */
-async function handleApiFootball(req, url) {
-  // API Key 从请求头取，不暴露在 URL 中
-  const apiKey = req.headers.get('X-Api-Key') || '';
-  if (!apiKey) {
-    return jsonResponse({ error: '缺少 X-Api-Key 请求头' }, 401);
-  }
-
-  // 去掉 /af 前缀，保留剩余路径和查询参数
-  const afPath = url.pathname.slice(3) + url.search;
-  const afUrl = 'https://v3.football.api-sports.io' + afPath;
-
-  try {
-    const r = await fetchWithTimeout(afUrl, {
-      headers: {
-        'x-apisports-key': apiKey,
-        'User-Agent': 'Mozilla/5.0',
-      },
-    });
-    if (!r.ok) {
-      return jsonResponse(
-        { error: `上游返回 ${r.status}` },
-        r.status,
-      );
-    }
-    const data = await r.json();
-    return jsonResponse(data);
-  } catch (e) {
-    const isTimeout = e.name === 'TimeoutError';
-    return jsonResponse(
-      { error: isTimeout ? '请求上游超时' : e.message },
-      isTimeout ? 504 : 502,
-    );
-  }
-}
-
 /** /bsd/* → sports.bzzoiro.com 代理 */
 async function handleBsd(req, url) {
   const bsdKey = req.headers.get('X-Bsd-Key') || '';
@@ -144,7 +108,7 @@ async function handleZhcw() {
       return [key, json];
     } catch (e) {
       // 单接口失败不阻断其他，返回空壳便于前端判断
-      return [key, { data: [], error: e.message, raw: text.slice(0, 100) }];
+      return [key, { data: [], error: e.message }];
     }
   });
 
@@ -167,10 +131,6 @@ export default {
     }
 
     const url = new URL(req.url);
-
-    if (url.pathname.startsWith('/af/') || url.pathname === '/af') {
-      return handleApiFootball(req, url);
-    }
 
     if (url.pathname.startsWith('/bsd/') || url.pathname === '/bsd') {
       return handleBsd(req, url);

@@ -677,18 +677,9 @@ window.addEventListener('load',()=>{
 // ══ 全玩法精算引擎 v10 ══
 const PROXY='https://proxy.947552250.workers.dev';
 
-// ── 方案B：独立λ计算（api-football.com）──
-// 填入你的API Key后自动启用独立λ，覆盖赔率反推λ
-const AF_KEY='83fa56de8ec29b67871e884c5994629d'; // 在此填入 api-football.com 的 API Key
 const BSD_KEY='A3f73245c1977a9ee85437522eca229962f321f2'; // Bzzoiro Sports Data API Token
-const AF_BASE='https://v3.football.api-sports.io';
-// 联赛ID映射（api-football league id）
-const AF_LEAGUE={
-  '欧冠':2,'英超':39,'西甲':140,'德甲':78,'意甲':135,'法甲':61,
-  '英冠':40,'亚冠精英':17,'MLS':253
-};
-// 球队名称中文→英文关键词映射（用于模糊匹配）
-const AF_TEAM={
+// 球队名称中文→英文关键词映射（用于BSD球队名称模糊匹配）
+const TEAM_EN={
   '皇马':'Real Madrid','曼城':'Manchester City','巴黎圣曼':'PSG','切尔西':'Chelsea',
   '阿森纳':'Arsenal','利物浦':'Liverpool','拜仁':'Bayern','巴萨':'Barcelona',
   '马竞':'Atletico','热刺':'Tottenham','纽卡斯尔':'Newcastle','博德闪耀':'Bodo',
@@ -697,53 +688,11 @@ const AF_TEAM={
   '町田泽维':'Machida','江原FC':'Gangwon','布里兰':'Central Coast','墨尔本城':'Melbourne City'
 };
 
-// 从api-football获取球队近10场主客场进球数，返回独立λ
-async function fetchIndepLambda(homeCN,awayCN,leagueCN){
-  if(!AF_KEY)return null;// 未配置Key，跳过
-  const leagueId=AF_LEAGUE[leagueCN]||null;
-  if(!leagueId)return null;
-  const homeEN=AF_TEAM[homeCN]||homeCN;
-  const awayEN=AF_TEAM[awayCN]||awayCN;
-  try{
-    // 搜索主客队ID
-    const afOpts={headers:{'X-Api-Key':AF_KEY}};
-    const [resH,resA]=await Promise.all([
-      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(homeEN)}`,afOpts),
-      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(awayEN)}`,afOpts)
-    ]);
-    const [dH,dA]=await Promise.all([resH.json(),resA.json()]);
-    const tidH=dH?.response?.[0]?.team?.id;
-    const tidA=dA?.response?.[0]?.team?.id;
-    if(!tidH||!tidA)return null;
-    // 足球赛季：1-6月用上年（如2026年3月→赛季2025），7-12月用本年
-    const now=new Date();
-    const season=now.getMonth()<6?now.getFullYear()-1:now.getFullYear();
-    // 获取主队近10场主场比赛、客队近10场客场比赛
-    const [fixH,fixA]=await Promise.all([
-      fetch(`${PROXY}/af/fixtures?team=${tidH}&league=${leagueId}&season=${season}&last=10`,afOpts),
-      fetch(`${PROXY}/af/fixtures?team=${tidA}&league=${leagueId}&season=${season}&last=10`,afOpts)
-    ]);
-    const [fH,fA]=await Promise.all([fixH.json(),fixA.json()]);
-    const gamesH=fH?.response||[];
-    const gamesA=fA?.response||[];
-    if(!gamesH.length||!gamesA.length)return null;
-    // 计算主队主场进球均值λH，客队客场进球均值λA
-    const homeScored=gamesH.filter(g=>g.teams.home.id===tidH).map(g=>g.goals.home||0);
-    const awayScored=gamesA.filter(g=>g.teams.away.id===tidA).map(g=>g.goals.away||0);
-    if(!homeScored.length||!awayScored.length)return null;
-    const lH=+(homeScored.reduce((s,v)=>s+v,0)/homeScored.length).toFixed(3);
-    const lA=+(awayScored.reduce((s,v)=>s+v,0)/awayScored.length).toFixed(3);
-    const lHc=Math.max(0.15,Math.min(3.9,lH));
-    const lAc=Math.max(0.15,Math.min(3.9,lA));
-    return{lH:lHc,lA:lAc,srcH:homeScored.length,srcA:awayScored.length};
-  }catch(e){return null;}
-}
-
 // 从BSD获取CatBoost ML预测概率
 async function fetchBsdPrediction(homeCN,awayCN){
   if(!BSD_KEY)return null;
-  const homeEN=(AF_TEAM[homeCN]||homeCN).toLowerCase();
-  const awayEN=(AF_TEAM[awayCN]||awayCN).toLowerCase();
+  const homeEN=(TEAM_EN[homeCN]||homeCN).toLowerCase();
+  const awayEN=(TEAM_EN[awayCN]||awayCN).toLowerCase();
   // 取每个单词中≥4字符的关键词做模糊匹配
   const kw=s=>s.split(/\s+/).filter(w=>w.length>=4);
   const hwds=kw(homeEN),awds=kw(awayEN);
@@ -1146,21 +1095,19 @@ async function scoreSelect(idx){
   const[lHodds,lAodds]=fitLambda(pH,pD,pA,avg);// 赔率反推λ
 
   // 尝试获取独立λ（方案B）
-  document.getElementById('score-result').innerHTML=`<div style="color:var(--sub);font-size:12px;padding:10px">⏳ 正在加载精算数据${AF_KEY?'（含独立λ验证）':''}${BSD_KEY?'+ BSD ML预测':''}…</div>`;
-  const [indep,bsdPred]=await Promise.all([
-    fetchIndepLambda(m.home,m.away,m.league),
-    fetchBsdPrediction(m.home,m.away)
-  ]);
+  document.getElementById('score-result').innerHTML=`<div style="color:var(--sub);font-size:12px;padding:10px">⏳ 正在加载精算数据${BSD_KEY?'（含BSD ML预测）':''}…</div>`;
+  const bsdPred=await fetchBsdPrediction(m.home,m.away);
 
-  // 最终使用λ：有独立λ时取加权融合（独立λ权重60%，赔率反推40%），无则纯赔率反推
-  let lH,lA,lambdaSrc;
-  if(indep){
-    lH=+(indep.lH*0.6+lHodds*0.4).toFixed(3);
-    lA=+(indep.lA*0.6+lAodds*0.4).toFixed(3);
-    lambdaSrc=`独立λ（近${indep.srcH}场主场+近${indep.srcA}场客场）× 60% + 赔率反推 × 40%`;
+  // 最终使用λ：有BSD预测时反推λ融合（BSD权重60%，赔率反推40%），无则纯赔率反推
+  let lH,lA,lambdaSrc,lHbsd,lAbsd;
+  if(bsdPred&&bsdPred.probH&&bsdPred.probD&&bsdPred.probA){
+    [lHbsd,lAbsd]=fitLambda(bsdPred.probH,bsdPred.probD,bsdPred.probA,avg);
+    lH=+(lHbsd*0.6+lHodds*0.4).toFixed(3);
+    lA=+(lAbsd*0.6+lAodds*0.4).toFixed(3);
+    lambdaSrc=`BSD ML反推λ × 60% + 赔率反推 × 40%`;
   } else {
     lH=lHodds;lA=lAodds;
-    lambdaSrc=AF_KEY?'独立λ获取失败，降级为赔率反推':'赔率反推（未配置AF_KEY）';
+    lambdaSrc='赔率反推λ（BSD未匹配到本场）';
   }
 
   // 动态ρ
@@ -1364,15 +1311,15 @@ async function scoreSelect(idx){
       <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)">${m.league}</span>
       <span style="margin-left:auto;font-size:10px;color:var(--sub);font-family:var(--mono)">λ主=${lH} · λ客=${lA} · DC ρ=${dcRho} · 水位${wr.toFixed(1)}%</span>
     </div>
-    ${indep?`
+    ${lHbsd?`
     <div style="background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:9px 14px;margin-bottom:10px;font-size:10px;font-family:var(--mono);line-height:1.8">
-      <span style="color:var(--green);font-weight:700">✦ 独立λ已启用</span> · ${lambdaSrc}<br>
-      赔率反推：λ主=${lHodds} / λ客=${lAodds} &nbsp;|&nbsp; 历史数据：λ主=${indep.lH} / λ客=${indep.lA}<br>
+      <span style="color:var(--green);font-weight:700">✦ BSD λ融合已启用</span> · ${lambdaSrc}<br>
+      赔率反推：λ主=${lHodds} / λ客=${lAodds} &nbsp;|&nbsp; BSD反推：λ主=${lHbsd} / λ客=${lAbsd}<br>
       <span style="color:var(--gold)">融合λ（最终使用）：λ主=${lH} / λ客=${lA}</span>
-      ${Math.abs(lH-lHodds)>0.2||Math.abs(lA-lAodds)>0.2?`<br><span style="color:var(--red)">⚠ 独立λ与赔率反推差异较大（>${0.2}），说明近期状态与长期赔率存在偏差，精算参考价值更高</span>`:''}
+      ${Math.abs(lH-lHodds)>0.2||Math.abs(lA-lAodds)>0.2?`<br><span style="color:var(--red)">⚠ BSD与赔率反推差异较大（>0.2），ML预测与市场赔率存在偏差，精算参考价值更高</span>`:''}
     </div>`:`
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 14px;margin-bottom:10px;font-size:10px;font-family:var(--mono);color:var(--sub)">
-      λ来源：${lambdaSrc}${!AF_KEY?' · <span style="color:var(--gold)">填入 AF_KEY 后启用独立λ验证，突破赔率反推天花板</span>':''}
+      λ来源：${lambdaSrc}
     </div>`}
 
     ${bsdPred?`
@@ -1486,7 +1433,7 @@ async function scoreSelect(idx){
         <div style="font-size:10px;color:var(--sub);font-family:var(--mono);line-height:1.7">
           BTTS概率（双方均进球）= <b style="color:var(--cyan)">${((1-ppcdf(lH,0))*(1-ppcdf(lA,0))*100).toFixed(1)}%</b>
           &nbsp;·&nbsp; xG差值（主−客）= <b style="color:${lH>lA?'var(--green)':lH<lA?'var(--red)':'var(--gold)'}">${(lH-lA)>0?'+':''}${(lH-lA).toFixed(2)}</b>
-          <br><span style="color:rgba(255,255,255,.3)">注：xG基于竞彩赔率反推λ计算，非Opta/Understat实测数据，精度受限于赔率质量</span>
+          <br><span style="color:rgba(255,255,255,.3)">注：xG基于赔率反推λ与BSD ML融合计算，有BSD预测时精度更高</span>
         </div>
       </div>
     </div>
