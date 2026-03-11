@@ -872,37 +872,46 @@ function setSS(msg,color){
   if(el){el.textContent=msg;el.style.color=color||'var(--sub)';}
 }
 
-// ── 数据拉取 ──
-// ══ Cloudflare Worker 新代码（支持crs比分接口，替换现有Worker代码）══
-// export default{async fetch(req){
-//   const cors={'Access-Control-Allow-Origin':'*','Content-Type':'application/json'};
-//   if(req.method==='OPTIONS')return new Response(null,{headers:cors});
-//   const base='https://interface.sporttery.cn/api/football/getMatchInfoList?gameNo=';
-//   const apis={spf:'10002101',crs:'10002102',rq:'10002103',tjq:'10002104',bqc:'10002105'};
-//   const h={'User-Agent':'Mozilla/5.0','Referer':'https://www.sporttery.cn/'};
-//   const rs=await Promise.all(Object.entries(apis).map(async([k,v])=>{
-//     try{const r=await fetch(base+v,{headers:h});const d=await r.json();return[k,d];}
-//     catch(e){return[k,{data:[]}];}
-//   }));
-//   return new Response(JSON.stringify(Object.fromEntries(rs)),{headers:cors});
-// }}
-// ═══════════════════════════════════════════════
+// ── 数据拉取（JSONP直连zhcw，无需Worker，浏览器在中国直接访问）──
+function zhcwJsonp(code){
+  return new Promise((resolve,reject)=>{
+    const cb='_zj_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const t=setTimeout(()=>{
+      delete window[cb];
+      if(script.parentNode)script.parentNode.removeChild(script);
+      reject(new Error('超时'));
+    },8000);
+    window[cb]=function(data){
+      clearTimeout(t);
+      delete window[cb];
+      if(script.parentNode)script.parentNode.removeChild(script);
+      resolve(data);
+    };
+    const script=document.createElement('script');
+    script.onerror=function(){clearTimeout(t);delete window[cb];reject(new Error('网络错误'));};
+    script.src='https://jc.zhcw.com/port/client_json.php?callback='+cb+'&transactionType='+code;
+    document.head.appendChild(script);
+  });
+}
 async function scoreFetch(){
   const btn=document.getElementById('score-btn');
   if(btn)btn.disabled=true;
   setSS('正在拉取全部玩法数据…','var(--gold)');
   try{
-    const r=await fetch(PROXY+'/zhcw');
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
+    const apis={spf:'10002101',crs:'10002102',rq:'10002103',tjq:'10002104',bqc:'10002105'};
+    const entries=await Promise.all(
+      Object.entries(apis).map(async([key,code])=>{
+        try{return[key,await zhcwJsonp(code)];}
+        catch(e){return[key,{data:[],error:e.message}];}
+      })
+    );
+    const d=Object.fromEntries(entries);
     const rawCrs=d?.crs?.data||[];
     const rawSpf=d?.spf?.data||[];
     const rawRq=d?.rq?.data||[];
     const rawTjq=d?.tjq?.data||[];
     const rawBqc=d?.bqc?.data||[];
     if(!rawSpf.length)throw new Error('无SPF数据，精算无法启动');
-    // ⚠ 若rawCrs为空，说明Worker未配置crs(10002102)接口
-    // 修复：将精算引擎注释里的Worker新代码粘贴到Cloudflare替换现有代码
 
     // matchId映射
     // 真实接口对应：
