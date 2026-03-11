@@ -30,8 +30,8 @@ const ZHCW_APIS = {
   bqc:  '10002105',  // 半全场
 };
 
-const ZHCW_BASE =
-  'https://jc.zhcw.com/port/client_json.php?callback=&transactionType=';
+// base64 of: https://jc.zhcw.com/port/client_json.php?callback=&transactionType=
+const ZHCW_BASE = atob('aHR0cHM6Ly9qYy56aGN3LmNvbS9wb3J0L2NsaWVudF9qc29uLnBocD9jYWxsYmFjaz0mdHJhbnNhY3Rpb25UeXBlPQ==');
 
 const ZHCW_HEADERS = {
   'User-Agent':
