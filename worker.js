@@ -133,17 +133,18 @@ async function handleBsd(req, url) {
 /** /zhcw → 并发拉取五种竞彩赔率数据 */
 async function handleZhcw() {
   const tasks = Object.entries(ZHCW_APIS).map(async ([key, code]) => {
+    let text = '';
     try {
       const r = await fetchWithTimeout(ZHCW_BASE + code, {
         headers: ZHCW_HEADERS,
       });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const text = await r.text();
+      text = await r.text();
       const json = parseZhcwJsonp(text);
       return [key, json];
     } catch (e) {
       // 单接口失败不阻断其他，返回空壳便于前端判断
-      return [key, { data: [], error: e.message }];
+      return [key, { data: [], error: e.message, raw: text.slice(0, 100) }];
     }
   });
 
