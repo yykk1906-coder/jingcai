@@ -705,9 +705,10 @@ async function fetchIndepLambda(homeCN,awayCN,leagueCN){
   const awayEN=AF_TEAM[awayCN]||awayCN;
   try{
     // 搜索主客队ID
+    const afOpts={headers:{'X-Api-Key':AF_KEY}};
     const [resH,resA]=await Promise.all([
-      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(homeEN)}&_key=${AF_KEY}`),
-      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(awayEN)}&_key=${AF_KEY}`)
+      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(homeEN)}`,afOpts),
+      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(awayEN)}`,afOpts)
     ]);
     const [dH,dA]=await Promise.all([resH.json(),resA.json()]);
     const tidH=dH?.response?.[0]?.team?.id;
@@ -718,8 +719,8 @@ async function fetchIndepLambda(homeCN,awayCN,leagueCN){
     const season=now.getMonth()<6?now.getFullYear()-1:now.getFullYear();
     // 获取主队近10场主场比赛、客队近10场客场比赛
     const [fixH,fixA]=await Promise.all([
-      fetch(`${PROXY}/af/fixtures?team=${tidH}&league=${leagueId}&season=${season}&last=10&_key=${AF_KEY}`),
-      fetch(`${PROXY}/af/fixtures?team=${tidA}&league=${leagueId}&season=${season}&last=10&_key=${AF_KEY}`)
+      fetch(`${PROXY}/af/fixtures?team=${tidH}&league=${leagueId}&season=${season}&last=10`,afOpts),
+      fetch(`${PROXY}/af/fixtures?team=${tidA}&league=${leagueId}&season=${season}&last=10`,afOpts)
     ]);
     const [fH,fA]=await Promise.all([fixH.json(),fixA.json()]);
     const gamesH=fH?.response||[];
