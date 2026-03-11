@@ -135,7 +135,7 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,106,0,.02)}
 .tbl-note{font-size:10.5px;color:var(--sub);padding:8px 12px;background:rgba(167,139,250,.04);border-radius:6px;border:1px solid rgba(167,139,250,.12);margin-top:6px;line-height:1.7}
 .detail-table th,.detail-table td{font-size:11.5px;padding:8px 10px}
-.ev-p{color:var(--green);font-weight:800}.ev-n{color:var(--red);font-weight:800}.ev-m{color:var(--gold);font-weight:800}
+.ev-p{color:var(--green);font-weight:800}.ev-neg{color:var(--red);font-weight:800}.ev-mid{color:var(--gold);font-weight:800}
 /* parlay */
 .parlay-card{background:#0b1627;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
 .pc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -235,12 +235,12 @@ tr:hover td{background:rgba(255,106,0,.02)}
 <!-- TAB NAV（精简版：6个）-->
 
 <div class="tabnav" id="tabs">
-  <div class="tab active"  onclick="sw('overview')">📋 今日概览</div>
-  <div class="tab"         onclick="sw('score')">⚡ 精算引擎</div>
-  <div class="tab tab-mc"  onclick="sw('mc')">🎲 串关模拟</div>
-  <div class="tab"         onclick="sw('odds')">📊 赔率盘口</div>
-  <div class="tab"         onclick="sw('early')" style="color:var(--gold)">🌅 早场联赛</div>
-  <div class="tab"         onclick="sw('info')">📋 数据说明</div>
+  <div class="tab active"  onclick="sw(event,'overview')">📋 今日概览</div>
+  <div class="tab"         onclick="sw(event,'score')">⚡ 精算引擎</div>
+  <div class="tab tab-mc"  onclick="sw(event,'mc')">🎲 串关模拟</div>
+  <div class="tab"         onclick="sw(event,'odds')">📊 赔率盘口</div>
+  <div class="tab"         onclick="sw(event,'early')" style="color:var(--gold)">🌅 早场联赛</div>
+  <div class="tab"         onclick="sw(event,'info')">📋 数据说明</div>
 </div>
 
 <div class="main">
@@ -272,7 +272,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:14px">
 
-```
 <!-- 006 -->
 <div class="card grade-A" style="margin-bottom:0;border-color:rgba(34,211,238,.2)">
   <div class="card-inner"><div class="cbar"></div><div class="cbody">
@@ -349,7 +348,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
     </div>
   </div></div>
 </div>
-```
 
   </div>
 
@@ -361,7 +359,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;margin-bottom:10px">
 
-```
 <div class="parlay-card" style="border-color:rgba(34,211,238,.4);background:#0c1a2e">
   <div class="pc-header">
     <div class="pc-rank" style="font-size:22px">01</div>
@@ -404,7 +401,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
     </div>
   </div>
 </div>
-```
 
   </div>
 
@@ -426,86 +422,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
   <div class="tbl-note">★★ = 今日全场最优 · ★ = 本场最优 · 水位12.6-13.0%正常范围 · SR无覆盖场次EV不做推荐 · 左右滑动查看更多</div>
 
 </div>
-
-<!-- ══ TAB 2: 精算引擎 ══（原TAB4，直接保留）
-          <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:27.6%"></div></div>
-          <div class="prob-pct pp-d">27.6%</div>
-          <div class="prob-odd">赔率 3.35</div>
-        </div>
-        <div class="prob-col">
-          <div class="prob-lbl">客胜 奥维耶多</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:21.2%"></div></div>
-          <div class="prob-pct pp-l">21.2%</div>
-          <div class="prob-odd">赔率 4.60</div>
-        </div>
-      </div>
-      <div class="metrics">
-        <div class="metric"><div class="mk">庄家抽水</div><div class="mv y">12.9%</div></div>
-        <div class="metric"><div class="mk">最优EV</div><div class="mv y">−2.5%</div></div>
-        <div class="metric"><div class="mk">推荐方向</div><div class="mv r">奥维耶多胜</div></div>
-        <div class="metric"><div class="mk">SR客胜率</div><div class="mv">21.2%</div></div>
-        <div class="metric"><div class="mk">庄家隐含</div><div class="mv">21.7%</div></div>
-        <div class="metric"><div class="mk">SR差值</div><div class="mv g">−0.5%≈0</div></div>
-      </div>
-      <div class="rec-row">
-        <span class="rec-lbl">★最优单项</span>
-        <span class="rec-bet rb-y">奥维耶多客胜 @4.60</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--cyan);margin-left:auto">EV −2.5% · 今日全场最优</span>
-      </div>
-      <button class="dtoggle" onclick="td(this)"><span class="dicon">▶</span> 判断依据</button>
-      <div class="dbody">SR显示西班牙人主胜51.2%，但赔率1.63对应庄家隐含概率61.3%，庄家<b>高估西班牙人约10个百分点</b>，导致主胜EV高达−16.5%，是本场最差选择。奥维耶多SR客胜21.2% vs 庄家隐含21.7%，两者几乎完全吻合，庄家定价最公允，EV仅损耗−2.5%。平局SR 27.6% vs 隐含25.8%，EV −7.5%次优。注意：这不代表奥维耶多大概率赢，只是赔率相对值得。</div>
-    </div></div>
-  </div>
-
-  <!-- 004 拉齐奥 -->
-
-  <div class="card grade-B" style="animation-delay:.08s">
-    <div class="card-inner"><div class="cbar"></div><div class="cbody">
-      <div class="card-head">
-        <div class="card-left">
-          <span class="mnum">#004</span>
-          <span class="lbadge lb-i">意甲 Serie A</span>
-          <span class="mname">拉齐奥 vs 萨索洛</span>
-        </div>
-        <div class="card-right"><span class="ev-tag ev-near">△ −7.8%</span><span class="src-tag src-sr">SR</span></div>
-      </div>
-      <div class="prob-row">
-        <div class="prob-col">
-          <div class="prob-lbl">主胜 拉齐奥</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-w" style="width:41.5%"></div></div>
-          <div class="prob-pct pp-w">41.5%</div>
-          <div class="prob-odd">赔率 2.09</div>
-        </div>
-        <div class="prob-col">
-          <div class="prob-lbl">平局</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-d" style="width:30.3%"></div></div>
-          <div class="prob-pct pp-d">30.3%</div>
-          <div class="prob-odd">赔率 2.90</div>
-        </div>
-        <div class="prob-col">
-          <div class="prob-lbl">客胜 萨索洛</div>
-          <div class="prob-bar-wrap"><div class="prob-bar pb-l" style="width:28.2%"></div></div>
-          <div class="prob-pct pp-l">28.2%</div>
-          <div class="prob-odd">赔率 3.27</div>
-        </div>
-      </div>
-      <div class="metrics">
-        <div class="metric"><div class="mk">庄家抽水</div><div class="mv y">13.0%</div></div>
-        <div class="metric"><div class="mk">最优EV</div><div class="mv y">−7.8%</div></div>
-        <div class="metric"><div class="mk">推荐方向</div><div class="mv r">△萨索洛胜</div></div>
-        <div class="metric"><div class="mk">SR客胜率</div><div class="mv">28.2%</div></div>
-        <div class="metric"><div class="mk">庄家隐含</div><div class="mv">23.9%</div></div>
-        <div class="metric"><div class="mk">SR差值</div><div class="mv g">+4.3%</div></div>
-      </div>
-      <div class="rec-row">
-        <span class="rec-lbl">次优</span>
-        <span class="rec-bet rb-y">萨索洛客胜 @3.27</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--gold);margin-left:auto">EV −7.8%</span>
-      </div>
-      <button class="dtoggle" onclick="td(this)"><span class="dicon">▶</span> 判断依据</button>
-      <div class="dbody">本场均衡，拉齐奥主胜41.5%但赔率2.09隐含47.8%，庄家高估拉齐奥。萨索洛SR 28.2%远高于庄家隐含23.9%，差值+4.3个百分点，是今日SR与庄家差距第二明显场次。萨索洛虽积分落后，但面临保级压力，客场仍有战斗力。让球-1客队赔率1.55隐含64.5%，无让球SR数据不精算。</div>
-    </div></div>
-  </div>
 
 <!-- ══ TAB 2: 精算引擎 ══ -->
 
@@ -636,7 +552,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
     <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px">📊 精算引擎参数速查总表</div>
     <div style="display:flex;flex-direction:column;gap:8px">
 
-```
   <!-- J1联赛 -->
   <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 14px">
     <div style="font-size:12px;font-weight:700;color:#ff6a00;margin-bottom:6px">🇯🇵 J1联赛</div>
@@ -732,7 +647,6 @@ tr:hover td{background:rgba(255,106,0,.02)}
 <div style="margin-top:12px;font-size:11px;color:var(--sub2);line-height:1.8">
   <b style="color:var(--gold)">如何使用：</b>用户提供早场赔率截图 → 引擎调用对应行参数 → 计算庄家隐含概率 → 与基准统计对比识别异常定价。<b style="color:var(--red)">SR无覆盖，不提供EV推荐。</b>
 </div>
-```
 
   </div>
 </div>
@@ -741,11 +655,11 @@ tr:hover td{background:rgba(255,106,0,.02)}
 
 <script>
 // ══ 标签切换 ══
-function sw(id){
+function sw(e,id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  event.currentTarget.classList.add('active');
+  e.currentTarget.classList.add('active');
   window.scrollTo({top:document.querySelector('.tabnav').offsetTop-10,behavior:'smooth'});
 }
 function td(btn){
@@ -763,17 +677,9 @@ window.addEventListener('load',()=>{
 // ══ 全玩法精算引擎 v10 ══
 const PROXY='https://proxy.947552250.workers.dev';
 
-// ── 方案B：独立λ计算（api-football.com）──
-// 填入你的API Key后自动启用独立λ，覆盖赔率反推λ
-const AF_KEY='83fa56de8ec29b67871e884c5994629d'; // 在此填入 api-football.com 的 API Key
-const AF_BASE='https://v3.football.api-sports.io';
-// 联赛ID映射（api-football league id）
-const AF_LEAGUE={
-  '欧冠':2,'英超':39,'西甲':140,'德甲':78,'意甲':135,'法甲':61,
-  '英冠':40,'亚冠精英':17,'MLS':253
-};
-// 球队名称中文→英文关键词映射（用于模糊匹配）
-const AF_TEAM={
+const BSD_KEY='A3f73245c1977a9ee85437522eca229962f321f2'; // Bzzoiro Sports Data API Token
+// 球队名称中文→英文关键词映射（用于BSD球队名称模糊匹配）
+const TEAM_EN={
   '皇马':'Real Madrid','曼城':'Manchester City','巴黎圣曼':'PSG','切尔西':'Chelsea',
   '阿森纳':'Arsenal','利物浦':'Liverpool','拜仁':'Bayern','巴萨':'Barcelona',
   '马竞':'Atletico','热刺':'Tottenham','纽卡斯尔':'Newcastle','博德闪耀':'Bodo',
@@ -782,44 +688,28 @@ const AF_TEAM={
   '町田泽维':'Machida','江原FC':'Gangwon','布里兰':'Central Coast','墨尔本城':'Melbourne City'
 };
 
-// 从api-football获取球队近10场主客场进球数，返回独立λ
-async function fetchIndepLambda(homeCN,awayCN,leagueCN){
-  if(!AF_KEY)return null;// 未配置Key，跳过
-  const leagueId=AF_LEAGUE[leagueCN]||null;
-  if(!leagueId)return null;
-  const homeEN=AF_TEAM[homeCN]||homeCN;
-  const awayEN=AF_TEAM[awayCN]||awayCN;
+// 从BSD获取CatBoost ML预测概率
+async function fetchBsdPrediction(homeCN,awayCN){
+  if(!BSD_KEY)return null;
+  const homeEN=(TEAM_EN[homeCN]||homeCN).toLowerCase();
+  const awayEN=(TEAM_EN[awayCN]||awayCN).toLowerCase();
+  // 取每个单词中≥4字符的关键词做模糊匹配
+  const kw=s=>s.split(/\s+/).filter(w=>w.length>=4);
+  const hwds=kw(homeEN),awds=kw(awayEN);
+  const hit=(bsdName,words)=>{const n=bsdName.toLowerCase();return words.some(w=>n.includes(w));};
   try{
-    // 搜索主客队ID
-    const [resH,resA]=await Promise.all([
-      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(homeEN)}&_key=${AF_KEY}`),
-      fetch(`${PROXY}/af/teams?search=${encodeURIComponent(awayEN)}&_key=${AF_KEY}`)
-    ]);
-    const [dH,dA]=await Promise.all([resH.json(),resA.json()]);
-    const tidH=dH?.response?.[0]?.team?.id;
-    const tidA=dA?.response?.[0]?.team?.id;
-    if(!tidH||!tidA)return null;
-    // 足球赛季：1-6月用上年（如2026年3月→赛季2025），7-12月用本年
-    const now=new Date();
-    const season=now.getMonth()<6?now.getFullYear()-1:now.getFullYear();
-    // 获取主队近10场主场比赛、客队近10场客场比赛
-    const [fixH,fixA]=await Promise.all([
-      fetch(`${PROXY}/af/fixtures?team=${tidH}&league=${leagueId}&season=${season}&last=10&_key=${AF_KEY}`),
-      fetch(`${PROXY}/af/fixtures?team=${tidA}&league=${leagueId}&season=${season}&last=10&_key=${AF_KEY}`)
-    ]);
-    const [fH,fA]=await Promise.all([fixH.json(),fixA.json()]);
-    const gamesH=fH?.response||[];
-    const gamesA=fA?.response||[];
-    if(!gamesH.length||!gamesA.length)return null;
-    // 计算主队主场进球均值λH，客队客场进球均值λA
-    const homeScored=gamesH.filter(g=>g.teams.home.id===tidH).map(g=>g.goals.home||0);
-    const awayScored=gamesA.filter(g=>g.teams.away.id===tidA).map(g=>g.goals.away||0);
-    if(!homeScored.length||!awayScored.length)return null;
-    const lH=+(homeScored.reduce((s,v)=>s+v,0)/homeScored.length).toFixed(3);
-    const lA=+(awayScored.reduce((s,v)=>s+v,0)/awayScored.length).toFixed(3);
-    const lHc=Math.max(0.15,Math.min(3.9,lH));
-    const lAc=Math.max(0.15,Math.min(3.9,lA));
-    return{lH:lHc,lA:lAc,srcH:homeScored.length,srcA:awayScored.length};
+    const r=await fetch(`${PROXY}/bsd/api/predictions/?upcoming=true`,{headers:{'X-Bsd-Key':BSD_KEY}});
+    if(!r.ok)return null;
+    const data=await r.json();
+    const list=Array.isArray(data)?data:(data.results||[]);
+    const pred=list.find(p=>{
+      const hn=String(p.home_team?.name||p.home_team||'');
+      const an=String(p.away_team?.name||p.away_team||'');
+      return hit(hn,hwds.length?hwds:[homeEN])&&hit(an,awds.length?awds:[awayEN]);
+    });
+    if(!pred)return null;
+    return{probH:pred.prob_home_win,probD:pred.prob_draw,probA:pred.prob_away_win,
+           probO25:pred.prob_over_25,probBtts:pred.prob_btts_yes,confidence:pred.confidence};
   }catch(e){return null;}
 }
 
@@ -982,37 +872,46 @@ function setSS(msg,color){
   if(el){el.textContent=msg;el.style.color=color||'var(--sub)';}
 }
 
-// ── 数据拉取 ──
-// ══ Cloudflare Worker 新代码（支持crs比分接口，替换现有Worker代码）══
-// export default{async fetch(req){
-//   const cors={'Access-Control-Allow-Origin':'*','Content-Type':'application/json'};
-//   if(req.method==='OPTIONS')return new Response(null,{headers:cors});
-//   const base='https://interface.sporttery.cn/api/football/getMatchInfoList?gameNo=';
-//   const apis={spf:'10002101',crs:'10002102',rq:'10002103',tjq:'10002104',bqc:'10002105'};
-//   const h={'User-Agent':'Mozilla/5.0','Referer':'https://www.sporttery.cn/'};
-//   const rs=await Promise.all(Object.entries(apis).map(async([k,v])=>{
-//     try{const r=await fetch(base+v,{headers:h});const d=await r.json();return[k,d];}
-//     catch(e){return[k,{data:[]}];}
-//   }));
-//   return new Response(JSON.stringify(Object.fromEntries(rs)),{headers:cors});
-// }}
-// ═══════════════════════════════════════════════
+// ── 数据拉取（JSONP直连zhcw，无需Worker，浏览器在中国直接访问）──
+function zhcwJsonp(code){
+  return new Promise((resolve,reject)=>{
+    const cb='_zj_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const t=setTimeout(()=>{
+      delete window[cb];
+      if(script.parentNode)script.parentNode.removeChild(script);
+      reject(new Error('超时'));
+    },8000);
+    window[cb]=function(data){
+      clearTimeout(t);
+      delete window[cb];
+      if(script.parentNode)script.parentNode.removeChild(script);
+      resolve(data);
+    };
+    const script=document.createElement('script');
+    script.onerror=function(){clearTimeout(t);delete window[cb];reject(new Error('网络错误'));};
+    script.src='https://jc.zhcw.com/port/client_json.php?callback='+cb+'&transactionType='+code;
+    document.head.appendChild(script);
+  });
+}
 async function scoreFetch(){
   const btn=document.getElementById('score-btn');
   if(btn)btn.disabled=true;
   setSS('正在拉取全部玩法数据…','var(--gold)');
   try{
-    const r=await fetch(PROXY);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
+    const apis={spf:'10002101',crs:'10002102',rq:'10002103',tjq:'10002104',bqc:'10002105'};
+    const entries=await Promise.all(
+      Object.entries(apis).map(async([key,code])=>{
+        try{return[key,await zhcwJsonp(code)];}
+        catch(e){return[key,{data:[],error:e.message}];}
+      })
+    );
+    const d=Object.fromEntries(entries);
     const rawCrs=d?.crs?.data||[];
     const rawSpf=d?.spf?.data||[];
     const rawRq=d?.rq?.data||[];
     const rawTjq=d?.tjq?.data||[];
     const rawBqc=d?.bqc?.data||[];
     if(!rawSpf.length)throw new Error('无SPF数据，精算无法启动');
-    // ⚠ 若rawCrs为空，说明Worker未配置crs(10002102)接口
-    // 修复：将精算引擎注释里的Worker新代码粘贴到Cloudflare替换现有代码
 
     // matchId映射
     // 真实接口对应：
@@ -1204,19 +1103,19 @@ async function scoreSelect(idx){
   const avg=getAvg(m.league);
   const[lHodds,lAodds]=fitLambda(pH,pD,pA,avg);// 赔率反推λ
 
-  // 尝试获取独立λ（方案B）
-  document.getElementById('score-result').innerHTML=`<div style="color:var(--sub);font-size:12px;padding:10px">⏳ 正在加载精算数据${AF_KEY?'（含独立λ验证）':''}…</div>`;
-  const indep=await fetchIndepLambda(m.home,m.away,m.league);
+  document.getElementById('score-result').innerHTML=`<div style="color:var(--sub);font-size:12px;padding:10px">⏳ 正在加载精算数据${BSD_KEY?'（含BSD ML预测）':''}…</div>`;
+  const bsdPred=await fetchBsdPrediction(m.home,m.away);
 
-  // 最终使用λ：有独立λ时取加权融合（独立λ权重60%，赔率反推40%），无则纯赔率反推
-  let lH,lA,lambdaSrc;
-  if(indep){
-    lH=+(indep.lH*0.6+lHodds*0.4).toFixed(3);
-    lA=+(indep.lA*0.6+lAodds*0.4).toFixed(3);
-    lambdaSrc=`独立λ（近${indep.srcH}场主场+近${indep.srcA}场客场）× 60% + 赔率反推 × 40%`;
+  // 最终使用λ：有BSD预测时反推λ融合（BSD权重60%，赔率反推40%），无则纯赔率反推
+  let lH,lA,lambdaSrc,lHbsd,lAbsd;
+  if(bsdPred&&bsdPred.probH&&bsdPred.probD&&bsdPred.probA){
+    [lHbsd,lAbsd]=fitLambda(bsdPred.probH,bsdPred.probD,bsdPred.probA,avg);
+    lH=+(lHbsd*0.6+lHodds*0.4).toFixed(3);
+    lA=+(lAbsd*0.6+lAodds*0.4).toFixed(3);
+    lambdaSrc=`BSD ML反推λ × 60% + 赔率反推 × 40%`;
   } else {
     lH=lHodds;lA=lAodds;
-    lambdaSrc=AF_KEY?'独立λ获取失败，降级为赔率反推':'赔率反推（未配置AF_KEY）';
+    lambdaSrc='赔率反推λ（BSD未匹配到本场）';
   }
 
   // 动态ρ
@@ -1420,16 +1319,32 @@ async function scoreSelect(idx){
       <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)">${m.league}</span>
       <span style="margin-left:auto;font-size:10px;color:var(--sub);font-family:var(--mono)">λ主=${lH} · λ客=${lA} · DC ρ=${dcRho} · 水位${wr.toFixed(1)}%</span>
     </div>
-    ${indep?`
+    ${lHbsd?`
     <div style="background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:9px 14px;margin-bottom:10px;font-size:10px;font-family:var(--mono);line-height:1.8">
-      <span style="color:var(--green);font-weight:700">✦ 独立λ已启用</span> · ${lambdaSrc}<br>
-      赔率反推：λ主=${lHodds} / λ客=${lAodds} &nbsp;|&nbsp; 历史数据：λ主=${indep.lH} / λ客=${indep.lA}<br>
+      <span style="color:var(--green);font-weight:700">✦ BSD λ融合已启用</span> · ${lambdaSrc}<br>
+      赔率反推：λ主=${lHodds} / λ客=${lAodds} &nbsp;|&nbsp; BSD反推：λ主=${lHbsd} / λ客=${lAbsd}<br>
       <span style="color:var(--gold)">融合λ（最终使用）：λ主=${lH} / λ客=${lA}</span>
-      ${Math.abs(lH-lHodds)>0.2||Math.abs(lA-lAodds)>0.2?`<br><span style="color:var(--red)">⚠ 独立λ与赔率反推差异较大（>${0.2}），说明近期状态与长期赔率存在偏差，精算参考价值更高</span>`:''}
+      ${Math.abs(lH-lHodds)>0.2||Math.abs(lA-lAodds)>0.2?`<br><span style="color:var(--red)">⚠ BSD与赔率反推差异较大（>0.2），ML预测与市场赔率存在偏差，精算参考价值更高</span>`:''}
     </div>`:`
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 14px;margin-bottom:10px;font-size:10px;font-family:var(--mono);color:var(--sub)">
-      λ来源：${lambdaSrc}${!AF_KEY?' · <span style="color:var(--gold)">填入 AF_KEY 后启用独立λ验证，突破赔率反推天花板</span>':''}
+      λ来源：${lambdaSrc}
     </div>`}
+
+    ${bsdPred?`
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.22);border-radius:8px;padding:9px 14px;margin-bottom:10px;font-size:10px;font-family:var(--mono);line-height:1.9">
+      <span style="color:var(--cyan);font-weight:700">⚡ BSD CatBoost ML预测</span>
+      <span style="margin-left:8px;background:rgba(56,182,255,.12);color:var(--cyan);padding:1px 6px;border-radius:3px">置信度 ${bsdPred.confidence!=null?(bsdPred.confidence*100).toFixed(0):'—'}%</span><br>
+      主胜 <b style="color:var(--green)">${(bsdPred.probH*100).toFixed(1)}%</b> ·
+      平 <b style="color:var(--gold)">${(bsdPred.probD*100).toFixed(1)}%</b> ·
+      客胜 <b style="color:var(--red)">${(bsdPred.probA*100).toFixed(1)}%</b>
+      &nbsp;|&nbsp; Over2.5 <b>${bsdPred.probO25!=null?(bsdPred.probO25*100).toFixed(1)+'%':'—'}</b>
+      &nbsp;|&nbsp; 双进球 <b>${bsdPred.probBtts!=null?(bsdPred.probBtts*100).toFixed(1)+'%':'—'}</b>
+      ${(()=>{
+        const diff=Math.abs(bsdPred.probH-vH)+Math.abs(bsdPred.probA-vA);
+        if(diff>0.12)return`<br><span style="color:var(--gold)">⚠ BSD与泊松分歧 ${(diff*100).toFixed(1)}pp · 两模型存在矛盾，谨慎参考</span>`;
+        return`<br><span style="color:var(--green)">✓ BSD与泊松方向一致（差异 ${(diff*100).toFixed(1)}pp）</span>`;
+      })()}
+    </div>`:''}
 
     <div class="tbl-note" style="margin-bottom:10px">
       <b style="color:var(--cyan)">真实竞彩胜平负赔率</b>：胜 <b style="color:var(--green)">${m.spf.h}</b> / 平 <b style="color:var(--gold)">${m.spf.d}</b> / 负 <b style="color:var(--red)">${m.spf.a}</b>
@@ -1526,7 +1441,7 @@ async function scoreSelect(idx){
         <div style="font-size:10px;color:var(--sub);font-family:var(--mono);line-height:1.7">
           BTTS概率（双方均进球）= <b style="color:var(--cyan)">${((1-ppcdf(lH,0))*(1-ppcdf(lA,0))*100).toFixed(1)}%</b>
           &nbsp;·&nbsp; xG差值（主−客）= <b style="color:${lH>lA?'var(--green)':lH<lA?'var(--red)':'var(--gold)'}">${(lH-lA)>0?'+':''}${(lH-lA).toFixed(2)}</b>
-          <br><span style="color:rgba(255,255,255,.3)">注：xG基于竞彩赔率反推λ计算，非Opta/Understat实测数据，精度受限于赔率质量</span>
+          <br><span style="color:rgba(255,255,255,.3)">注：xG基于赔率反推λ与BSD ML融合计算，有BSD预测时精度更高</span>
         </div>
       </div>
     </div>
@@ -1791,7 +1706,7 @@ function runMonteCarloWithData(selected){
           combos3.forEach(([a,b,c2],ci)=>{if(results[a]&&results[b]&&results[c2])combo3wins[ci]++;});
         }
 
-        const evClass=ev=>ev>=3?'ev-pos':ev>=-5?'ev-neu':'ev-neg';
+        const evClass=ev=>ev>=3?'ev-g':ev>=-5?'ev-m':'ev-b';
 
         const matchRows=selected.map((s,i)=>{
           const simProb=+(wins[i]/N*100).toFixed(1);
