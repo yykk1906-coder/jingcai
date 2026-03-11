@@ -892,7 +892,7 @@ async function scoreFetch(){
   if(btn)btn.disabled=true;
   setSS('正在拉取全部玩法数据…','var(--gold)');
   try{
-    const r=await fetch(PROXY);
+    const r=await fetch(PROXY+'/zhcw');
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
     const rawCrs=d?.crs?.data||[];
@@ -1094,7 +1094,6 @@ async function scoreSelect(idx){
   const avg=getAvg(m.league);
   const[lHodds,lAodds]=fitLambda(pH,pD,pA,avg);// 赔率反推λ
 
-  // 尝试获取独立λ（方案B）
   document.getElementById('score-result').innerHTML=`<div style="color:var(--sub);font-size:12px;padding:10px">⏳ 正在加载精算数据${BSD_KEY?'（含BSD ML预测）':''}…</div>`;
   const bsdPred=await fetchBsdPrediction(m.home,m.away);
 
